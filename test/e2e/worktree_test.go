@@ -148,7 +148,7 @@ func TestWorktreeRemoval(t *testing.T) {
 		configContent := `version: 1
 defaults:
   base_dir: custom-location`
-		env.WriteFile(repo.Path()+"/.wtp.yml", configContent)
+		env.WriteFile(repo.Path()+"/.gw.yml", configContent)
 
 		// Remove should NOT work because worktree is outside the configured base_dir
 		output, err := repo.RunWTP("remove", "remove-test")
@@ -252,7 +252,7 @@ func TestWorktreeWithConfig(t *testing.T) {
 		configContent := `version: "1.0"
 defaults:
   base_dir: custom-worktrees`
-		env.WriteFile(repo.Path()+"/.wtp.yml", configContent)
+		env.WriteFile(repo.Path()+"/.gw.yml", configContent)
 
 		// Create worktree with config
 		output, err := repo.RunWTP("add", "-b", "feature/custom-dir")
@@ -281,7 +281,7 @@ hooks:
       to: copied.txt
     - type: command
       command: touch hook-executed.txt`
-		env.WriteFile(repo.Path()+"/.wtp.yml", configContent)
+		env.WriteFile(repo.Path()+"/.gw.yml", configContent)
 
 		// Create worktree with hooks
 		output, err := repo.RunWTP("add", "-b", "feature/hooks")

@@ -32,7 +32,7 @@ func TestHookOutputStreaming(t *testing.T) {
 	configData, err := yaml.Marshal(config)
 	framework.AssertNoError(t, err)
 
-	configPath := filepath.Join(repo.Path(), ".wtp.yml")
+	configPath := filepath.Join(repo.Path(), ".gw.yml")
 	framework.AssertNoError(t, os.WriteFile(configPath, configData, 0644))
 
 	// Run add command with -b flag to create new branch and capture output

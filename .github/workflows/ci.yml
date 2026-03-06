@@ -83,11 +83,11 @@ jobs:
 
     - name: Build binary
       run: |
-        CGO_ENABLED=0 GOOS=linux go build -o wtp-linux ./cmd/wtp
-        CGO_ENABLED=0 GOOS=darwin go build -o wtp-darwin ./cmd/wtp
-        # CGO_ENABLED=0 GOOS=windows go build -o wtp-windows.exe ./cmd/wtp  # Temporarily disabled
+        CGO_ENABLED=0 GOOS=linux go build -o gw-linux ./cmd/gw
+        CGO_ENABLED=0 GOOS=darwin go build -o gw-darwin ./cmd/gw
+        # CGO_ENABLED=0 GOOS=windows go build -o gw-windows.exe ./cmd/gw  # Temporarily disabled
 
     - name: Test binary
       run: |
-        chmod +x wtp-linux
-        ./wtp-linux --help
+        chmod +x gw-linux
+        ./gw-linux --help

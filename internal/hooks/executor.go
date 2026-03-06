@@ -217,11 +217,11 @@ func (e *Executor) executeCommandHookWithWriter(w io.Writer, hook *config.Hook, 
 	}
 	cmd.Dir = workDir
 
-	// Set environment variables (filter out WTP_SHELL_INTEGRATION)
+	// Set environment variables (filter out GW_SHELL_INTEGRATION)
 	env := os.Environ()
 	filtered := make([]string, 0, len(env))
 	for _, e := range env {
-		if !strings.HasPrefix(e, "WTP_SHELL_INTEGRATION=") {
+		if !strings.HasPrefix(e, "GW_SHELL_INTEGRATION=") {
 			filtered = append(filtered, e)
 		}
 	}
@@ -232,8 +232,8 @@ func (e *Executor) executeCommandHookWithWriter(w io.Writer, hook *config.Hook, 
 
 	// Add worktree-specific environment variables
 	cmd.Env = append(cmd.Env,
-		fmt.Sprintf("GIT_WTP_WORKTREE_PATH=%s", worktreePath),
-		fmt.Sprintf("GIT_WTP_REPO_ROOT=%s", e.repoRoot))
+		fmt.Sprintf("GIT_GW_WORKTREE_PATH=%s", worktreePath),
+		fmt.Sprintf("GIT_GW_REPO_ROOT=%s", e.repoRoot))
 
 	// Log the command execution to writer
 	if _, err := fmt.Fprintf(w, "  Running: %s", hook.Command); err != nil {

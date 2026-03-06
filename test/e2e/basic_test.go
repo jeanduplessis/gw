@@ -14,7 +14,7 @@ func TestBasicCommands(t *testing.T) {
 	t.Run("Version", func(t *testing.T) {
 		output, err := env.RunWTP("--version")
 		framework.AssertNoError(t, err)
-		framework.AssertOutputContains(t, output, "wtp version")
+		framework.AssertOutputContains(t, output, "gw version")
 	})
 
 	t.Run("Help", func(t *testing.T) {
@@ -51,9 +51,9 @@ func TestInitCommand(t *testing.T) {
 		output, err := repo.RunWTP("init")
 		framework.AssertNoError(t, err)
 		framework.AssertOutputContains(t, output, "Configuration file created")
-		framework.AssertFileExists(t, repo, ".wtp.yml")
+		framework.AssertFileExists(t, repo, ".gw.yml")
 
-		content := repo.ReadFile(".wtp.yml")
+		content := repo.ReadFile(".gw.yml")
 		framework.AssertTrue(t, strings.Contains(content, "version:"), "Config should contain version")
 		framework.AssertTrue(t, strings.Contains(content, "base_dir:"), "Config should contain base_dir")
 	})
@@ -87,13 +87,13 @@ func TestVersionCommand(t *testing.T) {
 	t.Run("ShortFlag", func(t *testing.T) {
 		output, err := env.RunWTP("-v")
 		framework.AssertNoError(t, err)
-		framework.AssertOutputContains(t, output, "wtp version")
+		framework.AssertOutputContains(t, output, "gw version")
 	})
 
 	t.Run("LongFlag", func(t *testing.T) {
 		output, err := env.RunWTP("--version")
 		framework.AssertNoError(t, err)
-		framework.AssertOutputContains(t, output, "wtp version")
+		framework.AssertOutputContains(t, output, "gw version")
 	})
 }
 

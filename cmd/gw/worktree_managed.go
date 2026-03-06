@@ -7,7 +7,7 @@ import (
 	"github.com/satococoa/wtp/v2/internal/config"
 )
 
-// isWorktreeManagedCommon determines whether a worktree path is considered managed by wtp.
+// isWorktreeManagedCommon determines whether a worktree path is considered managed by gw.
 // The logic is shared across multiple commands so that we consistently classify worktrees.
 func isWorktreeManagedCommon(worktreePath string, cfg *config.Config, mainRepoPath string, isMain bool) bool {
 	if isMain {

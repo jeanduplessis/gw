@@ -1,4 +1,4 @@
-// Package config defines the configuration schema and helpers for wtp.
+// Package config defines the configuration schema and helpers for gw.
 package config
 
 import (
@@ -9,7 +9,7 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-// Config represents the wtp configuration
+// Config represents the gw configuration
 type Config struct {
 	Version  string   `yaml:"version"`
 	Defaults Defaults `yaml:"defaults,omitempty"`
@@ -37,8 +37,8 @@ type Hook struct {
 }
 
 const (
-	// ConfigFileName is the default filename for the wtp configuration.
-	ConfigFileName = ".wtp.yml"
+	// ConfigFileName is the default filename for the gw configuration.
+	ConfigFileName = ".gw.yml"
 	// CurrentVersion represents the current configuration version written to disk.
 	CurrentVersion = "1.0"
 	// DefaultBaseDir is the default directory for new worktrees relative to a repository.
@@ -52,7 +52,7 @@ const (
 	configFilePermissions = 0o600
 )
 
-// LoadConfig loads configuration from .wtp.yml in the repository root
+// LoadConfig loads configuration from .gw.yml in the repository root
 func LoadConfig(repoRoot string) (*Config, error) {
 	cleanedRoot := filepath.Clean(repoRoot)
 	if !filepath.IsAbs(cleanedRoot) {

@@ -21,7 +21,7 @@ import (
 // Variable to allow mocking in tests
 var removeGetwd = os.Getwd
 
-// isWorktreeManaged determines if a worktree is managed by wtp
+// isWorktreeManaged determines if a worktree is managed by gw
 func isWorktreeManaged(worktreePath string, cfg *config.Config, mainRepoPath string, isMain bool) bool {
 	return isWorktreeManagedCommon(worktreePath, cfg, mainRepoPath, isMain)
 }
@@ -32,12 +32,12 @@ func NewRemoveCommand() *cli.Command {
 		Name:      "remove",
 		Aliases:   []string{"rm"},
 		Usage:     "Remove a worktree",
-		UsageText: "wtp remove <worktree-name>",
+		UsageText: "gw remove <worktree-name>",
 		Description: "Removes the worktree with the specified directory name.\n\n" +
 			"Examples:\n" +
-			"  wtp remove feature-old                  # Remove worktree\n" +
-			"  wtp remove -f feature-dirty             # Force remove dirty worktree\n" +
-			"  wtp remove --with-branch feature-done   # Also delete the associated branch",
+			"  gw remove feature-old                  # Remove worktree\n" +
+			"  gw remove -f feature-dirty             # Force remove dirty worktree\n" +
+			"  gw remove --with-branch feature-done   # Also delete the associated branch",
 		ShellComplete: completeWorktrees,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
@@ -238,7 +238,7 @@ func findTargetWorktreeFromList(worktrees []git.Worktree, worktreeName string) (
 			continue
 		}
 
-		// Skip unmanaged worktrees - they cannot be removed by wtp
+		// Skip unmanaged worktrees - they cannot be removed by gw
 		if !isWorktreeManaged(wt.Path, cfg, mainWorktreePath, wt.IsMain) {
 			continue
 		}

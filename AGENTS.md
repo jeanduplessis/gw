@@ -1,24 +1,24 @@
 # Repository Guidelines
 
 ## Document Purpose
-- Single source of truth for AI assistants contributing to `wtp`.
+- Single source of truth for AI assistants contributing to `gw`.
 - Consolidates design decisions, workflow expectations, and coding standards previously split across `AGENTS.md` and `CLAUDE.md`.
 
 ## Project Structure & Modules
 - Root module: `github.com/satococoa/wtp/v2` (Go 1.24).
-- CLI entrypoint: `cmd/wtp`.
+- CLI entrypoint: `cmd/gw`.
 - Internal packages: `internal/{git,config,hooks,command,errors,io}`.
 - Tests: unit tests alongside packages (`*_test.go`), end-to-end tests in `test/e2e`.
-- Tooling/config: `.golangci.yml`, `.goreleaser.yml`, `Taskfile.yml`, `.wtp.yml` (project hooks), `docs/`.
+- Tooling/config: `.golangci.yml`, `.goreleaser.yml`, `Taskfile.yml`, `.gw.yml` (project hooks), `docs/`.
 
 ## Build, Test, and Dev Commands
-- Build: `go tool task build` (or `task build`) → outputs `./wtp`.
+- Build: `go tool task build` (or `task build`) → outputs `./gw`.
 - Install: `go tool task install` → installs to `GOBIN`/`GOPATH/bin`.
 - Test (unit + race + coverage): `go tool task test` → writes `coverage.out`.
 - Lint: `go tool task lint` (golangci-lint).
 - Format: `go tool task fmt` (golangci-lint fmt → gofmt + goimports).
-- E2E tests: `go tool task test-e2e` (uses built binary; override with `WTP_E2E_BINARY=/abs/path/wtp`).
-- Direct build (no Task): `go build -o wtp ./cmd/wtp`.
+- E2E tests: `go tool task test-e2e` (uses built binary; override with `GW_E2E_BINARY=/abs/path/gw`).
+- Direct build (no Task): `go build -o gw ./cmd/gw`.
 - Dev cycle: `go tool task dev` (runs clean, fmt, lint, test, build).
 
 ## Coding Style & Naming
@@ -36,7 +36,7 @@
 - Add CLI output or screenshots when UX changes.
 
 ## Security & Configuration Tips
-- Project hooks are defined in `.wtp.yml`. Keep commands deterministic and safe; avoid destructive steps by default.
+- Project hooks are defined in `.gw.yml`. Keep commands deterministic and safe; avoid destructive steps by default.
 - Do not commit secrets; use example files (e.g., `.env.example`) and copy in hooks.
 
 ## TDD Workflow
@@ -46,14 +46,14 @@
 - Update README/CLI help when user-facing behavior changes.
 
 ### RED → GREEN → REFACTOR Example
-1. **RED**: write an end-to-end or unit test that captures the desired behavior. Example: add a failing E2E test for `wtp prune` that asserts a detached worktree is removed.
+1. **RED**: write an end-to-end or unit test that captures the desired behavior. Example: add a failing E2E test for `gw prune` that asserts a detached worktree is removed.
 2. **GREEN**: implement the minimum code to satisfy that test. Keep the change small and focused on the behavior under test.
 3. **REFACTOR**: clean up duplication, rename helpers, and harden edge cases while keeping tests green.
 
 ### Quick Testing Tips
-- Use `go run ./cmd/wtp <args>` for rapid feedback instead of building binaries.
-- Run commands from inside a worktree to mimic real usage (e.g., `go run ../cmd/wtp add feature/new-feature`).
-- Toggle shell integration paths with `WTP_SHELL_INTEGRATION=1` when testing cd behavior.
+- Use `go run ./cmd/gw <args>` for rapid feedback instead of building binaries.
+- Run commands from inside a worktree to mimic real usage (e.g., `go run ../cmd/gw add feature/new-feature`).
+- Toggle shell integration paths with `GW_SHELL_INTEGRATION=1` when testing cd behavior.
 
 ### Testing Strategy
 - Unit tests target 70% of coverage: fast feedback, mocked git interactions, table-driven cases.
@@ -83,7 +83,7 @@
 ### Hook System Design
 - Post-create hooks handle both file copying (e.g., `.env`) and command execution.
 - Captures the common 90% of project bootstrap needs without over-engineering.
-- Hooks are declared in `.wtp.yml`, keeping repository-specific automation explicit.
+- Hooks are declared in `.gw.yml`, keeping repository-specific automation explicit.
 
 ### Worktree Naming Convention
 1. **Main worktree**: always rendered as `@`.
@@ -91,9 +91,9 @@
 3. **Fallback**: directory name is used if path resolution fails so that UX remains consistent.
 
 **Implementation Notes**
-- `getWorktreeNameFromPath()` in `cmd/wtp/remove.go` resolves display names.
+- `getWorktreeNameFromPath()` in `cmd/gw/remove.go` resolves display names.
 - Shared across shell completion, user-facing errors, and command parsing.
-- Ensures commands such as `wtp remove feat/foo` and `wtp cd feat/foo` share the same identifier.
+- Ensures commands such as `gw remove feat/foo` and `gw cd feat/foo` share the same identifier.
 
 ## Shell Integration Architecture (v1.2.0)
 ### "Less is More" Approach
@@ -101,21 +101,21 @@
 - Homebrew and direct installs can compose the pieces they need.
 
 ### Command Structure
-- **`wtp cd <worktree>`**: outputs the absolute worktree path with no side effects.
-- **`wtp completion <shell>`**: generates pure completion scripts via `urfave/cli`.
-- **`wtp hook <shell>`**: emits shell functions that intercept `wtp cd` for seamless navigation (bash, zsh, fish).
-- **`wtp shell-init <shell>`**: convenience command that combines completion and hook output.
+- **`gw cd <worktree>`**: outputs the absolute worktree path with no side effects.
+- **`gw completion <shell>`**: generates pure completion scripts via `urfave/cli`.
+- **`gw hook <shell>`**: emits shell functions that intercept `gw cd` for seamless navigation (bash, zsh, fish).
+- **`gw shell-init <shell>`**: convenience command that combines completion and hook output.
 
 ### User Experience Matrix
 | Installation Method | Tab Completion | cd Functionality |
 |---------------------|----------------|------------------|
-| Homebrew            | Automatic      | `eval "$(wtp hook <shell>)"` |
-| `go install`        | `eval "$(wtp completion <shell>)"` | `eval "$(wtp hook <shell>)"` |
+| Homebrew            | Automatic      | `eval "$(gw hook <shell>)"` |
+| `go install`        | `eval "$(gw completion <shell>)"` | `eval "$(gw hook <shell>)"` |
 
 ### Migration Notes
-- `wtp cd` no longer depends on `WTP_SHELL_INTEGRATION=1`; the command itself only prints paths.
+- `gw cd` no longer depends on `GW_SHELL_INTEGRATION=1`; the command itself only prints paths.
 - Existing completion scripts from v1.1.x still work but omit cd helpers unless users add hooks.
-- Future Homebrew enhancements may lazy-load integration by wrapping `wtp shell-init` on first use.
+- Future Homebrew enhancements may lazy-load integration by wrapping `gw shell-init` on first use.
 
 ## Additional References
 - Architecture overview: `docs/architecture.md`.

@@ -20,13 +20,13 @@ const (
 
 // TestEnvironment manages the temporary state for an end-to-end test run.
 type TestEnvironment struct {
-	t         *testing.T
-	tmpDir    string
-	wtpBinary string
-	cleanup   []func()
+	t        *testing.T
+	tmpDir   string
+	gwBinary string
+	cleanup  []func()
 }
 
-// NewTestEnvironment builds a new test environment and compiles the wtp binary when needed.
+// NewTestEnvironment builds a new test environment and compiles the gw binary when needed.
 func NewTestEnvironment(t *testing.T) *TestEnvironment {
 	t.Helper()
 
@@ -37,41 +37,41 @@ func NewTestEnvironment(t *testing.T) *TestEnvironment {
 		cleanup: []func(){},
 	}
 
-	env.buildWTP()
+	env.buildGW()
 
 	return env
 }
 
-func (e *TestEnvironment) buildWTP() {
+func (e *TestEnvironment) buildGW() {
 	e.t.Helper()
 
-	wtpBinary := filepath.Join(e.tmpDir, "wtp")
-	if runtime := os.Getenv("WTP_E2E_BINARY"); runtime != "" {
-		wtpBinary = runtime
-		if _, err := os.Stat(wtpBinary); err != nil {
-			e.t.Fatalf("Specified WTP binary not found: %s", wtpBinary)
+	gwBinary := filepath.Join(e.tmpDir, "gw")
+	if runtime := os.Getenv("GW_E2E_BINARY"); runtime != "" {
+		gwBinary = runtime
+		if _, err := os.Stat(gwBinary); err != nil {
+			e.t.Fatalf("Specified gw binary not found: %s", gwBinary)
 		}
 	} else {
 		projectRoot := e.findProjectRoot()
 		// #nosec G204 -- test helper builds the binary in an isolated temp directory
-		cmd := exec.Command("go", "build", "-o", wtpBinary, "./cmd/wtp")
+		cmd := exec.Command("go", "build", "-o", gwBinary, "./cmd/gw")
 		cmd.Dir = projectRoot
 		if output, err := cmd.CombinedOutput(); err != nil {
-			e.t.Fatalf("Failed to build wtp binary: %v\nOutput: %s", err, output)
+			e.t.Fatalf("Failed to build gw binary: %v\nOutput: %s", err, output)
 		}
 	}
 
 	// Validate the binary path
-	wtpBinary = filepath.Clean(wtpBinary)
-	if !filepath.IsAbs(wtpBinary) {
-		absPath, err := filepath.Abs(wtpBinary)
+	gwBinary = filepath.Clean(gwBinary)
+	if !filepath.IsAbs(gwBinary) {
+		absPath, err := filepath.Abs(gwBinary)
 		if err != nil {
 			e.t.Fatalf("Failed to get absolute path for binary: %v", err)
 		}
-		wtpBinary = absPath
+		gwBinary = absPath
 	}
 
-	e.wtpBinary = wtpBinary
+	e.gwBinary = gwBinary
 }
 
 func (e *TestEnvironment) findProjectRoot() string {
@@ -158,7 +158,7 @@ func (e *TestEnvironment) writeFile(path, content string) {
 	}
 }
 
-// RunWTP executes the wtp binary with the provided arguments.
+// RunWTP executes the gw binary with the provided arguments (kept for backward compatibility).
 func (e *TestEnvironment) RunWTP(args ...string) (string, error) {
 	// Validate args don't contain dangerous characters
 	for _, arg := range args {
@@ -168,7 +168,7 @@ func (e *TestEnvironment) RunWTP(args ...string) (string, error) {
 	}
 
 	// Create command with validated binary path
-	cmd := createSafeCommand(e.wtpBinary, args...)
+	cmd := createSafeCommand(e.gwBinary, args...)
 	output, err := cmd.CombinedOutput()
 	return string(output), err
 }
@@ -222,7 +222,7 @@ type TestRepo struct {
 	path string
 }
 
-// RunWTP executes the wtp binary from the repository directory.
+// RunWTP executes the gw binary from the repository directory (kept for backward compatibility).
 func (r *TestRepo) RunWTP(args ...string) (string, error) {
 	// Validate args don't contain dangerous characters
 	for _, arg := range args {
@@ -232,7 +232,7 @@ func (r *TestRepo) RunWTP(args ...string) (string, error) {
 	}
 
 	// Create command with validated binary path
-	cmd := createSafeCommand(r.env.wtpBinary, args...)
+	cmd := createSafeCommand(r.env.gwBinary, args...)
 	cmd.Dir = r.path
 	cmd.Env = append(os.Environ(), "HOME="+r.env.tmpDir)
 
@@ -280,9 +280,9 @@ func (r *TestRepo) Path() string {
 	return r.path
 }
 
-// WriteConfig writes a .wtp.yml configuration file into the repository.
+// WriteConfig writes a .gw.yml configuration file into the repository.
 func (r *TestRepo) WriteConfig(content string) {
-	configPath := filepath.Join(r.path, ".wtp.yml")
+	configPath := filepath.Join(r.path, ".gw.yml")
 	r.env.writeFile(configPath, content)
 }
 

@@ -18,7 +18,7 @@ import (
 	"github.com/satococoa/wtp/v2/internal/git"
 )
 
-// isWorktreeManagedCd determines if a worktree is managed by wtp (for cd command)
+// isWorktreeManagedCd determines if a worktree is managed by gw (for cd command)
 func isWorktreeManagedCd(worktreePath string, cfg *config.Config, mainRepoPath string, isMain bool) bool {
 	return isWorktreeManagedCommon(worktreePath, cfg, mainRepoPath, isMain)
 }
@@ -31,13 +31,13 @@ func NewCdCommand() *cli.Command {
 		Description: "Output the absolute path to the specified worktree.\n" +
 			"If no worktree is specified, outputs the main worktree path (like cd goes to $HOME).\n\n" +
 			"Usage:\n" +
-			"  Direct:     cd \"$(wtp cd feature)\"\n" +
-			"  With hook:  wtp cd feature\n" +
-			"  Go home:    wtp cd\n\n" +
+			"  Direct:     cd \"$(gw cd feature)\"\n" +
+			"  With hook:  gw cd feature\n" +
+			"  Go home:    gw cd\n\n" +
 			"To enable the hook for easier navigation:\n" +
-			"  Bash: eval \"$(wtp hook bash)\"\n" +
-			"  Zsh:  eval \"$(wtp hook zsh)\"\n" +
-			"  Fish: wtp hook fish | source",
+			"  Bash: eval \"$(gw hook bash)\"\n" +
+			"  Zsh:  eval \"$(gw hook zsh)\"\n" +
+			"  Fish: gw hook fish | source",
 		ArgsUsage:     "[worktree-name]",
 		Action:        cdToWorktree,
 		ShellComplete: completeWorktreesForCd,
@@ -170,7 +170,7 @@ func resolveCdWorktreePath(worktreeName string, worktrees []git.Worktree, mainWo
 
 // tryDirectMatches attempts direct name matches
 func tryDirectMatches(wt *git.Worktree, worktreeName string, cfg *config.Config, mainWorktreePath string) string {
-	// Skip unmanaged worktrees - they cannot be navigated to by wtp
+	// Skip unmanaged worktrees - they cannot be navigated to by gw
 	if !isWorktreeManagedCd(wt.Path, cfg, mainWorktreePath, wt.IsMain) {
 		return ""
 	}
@@ -217,7 +217,7 @@ func tryMainWorktreeMatches(wt *git.Worktree, worktreeName, mainWorktreePath str
 		return wt.Path
 	}
 
-	// Priority 7: Legacy completion display format ("wtp(root worktree)" → root worktree)
+	// Priority 7: Legacy completion display format ("gw(root worktree)" → root worktree)
 	repoRootFormat := filepath.Base(wt.Path) + "(root worktree)"
 	if worktreeName == repoRootFormat {
 		return wt.Path

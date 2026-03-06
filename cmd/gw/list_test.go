@@ -251,7 +251,7 @@ func TestListCommand_NotInGitRepo(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	err = app.Run(ctx, []string{"wtp", "list"})
+	err = app.Run(ctx, []string{"gw", "list"})
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "not in a git repository")
 }
@@ -1299,7 +1299,7 @@ func TestCompleteList_SuggestsQuietFlag(t *testing.T) {
 		originalArgs := os.Args
 		t.Cleanup(func() { os.Args = originalArgs })
 
-		os.Args = []string{"wtp", "list", "--q", "--generate-shell-completion"}
+		os.Args = []string{"gw", "list", "--q", "--generate-shell-completion"}
 
 		var buf bytes.Buffer
 		cmd := NewListCommand()

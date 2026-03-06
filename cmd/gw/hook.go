@@ -14,12 +14,12 @@ func NewHookCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "hook",
 		Usage: "Generate shell hook for cd functionality",
-		Description: "Generate shell hook scripts that enable the 'wtp cd' command to change directories. " +
+		Description: "Generate shell hook scripts that enable the 'gw cd' command to change directories. " +
 			"This provides a seamless navigation experience without needing subshells.\n\n" +
 			"To enable the hook, add the following to your shell config:\n" +
-			"  Bash (~/.bashrc):         eval \"$(wtp hook bash)\"\n" +
-			"  Zsh (~/.zshrc):           eval \"$(wtp hook zsh)\"\n" +
-			"  Fish (~/.config/fish/config.fish): wtp hook fish | source",
+			"  Bash (~/.bashrc):         eval \"$(gw hook bash)\"\n" +
+			"  Zsh (~/.zshrc):           eval \"$(gw hook zsh)\"\n" +
+			"  Fish (~/.config/fish/config.fish): gw hook fish | source",
 		Commands: []*cli.Command{
 			{
 				Name:        "bash",
@@ -68,32 +68,32 @@ func hookFish(_ context.Context, cmd *cli.Command) error {
 }
 
 func printBashHook(w io.Writer) error {
-	_, err := fmt.Fprintln(w, `# wtp cd command hook for bash
-wtp() {
+	_, err := fmt.Fprintln(w, `# gw cd command hook for bash
+gw() {
     for arg in "$@"; do
         if [[ "$arg" == "--generate-shell-completion" ]]; then
-            command wtp "$@"
+            command gw "$@"
             return $?
         fi
     done
     if [[ "$1" == "cd" ]]; then
         local target_dir
         if [[ -z "$2" ]]; then
-            target_dir=$(command wtp cd 2>/dev/null)
+            target_dir=$(command gw cd 2>/dev/null)
         else
-            target_dir=$(command wtp cd "$2" 2>/dev/null)
+            target_dir=$(command gw cd "$2" 2>/dev/null)
         fi
         if [[ $? -eq 0 && -n "$target_dir" ]]; then
             cd "$target_dir"
         else
             if [[ -z "$2" ]]; then
-                command wtp cd
+                command gw cd
             else
-                command wtp cd "$2"
+                command gw cd "$2"
             fi
         fi
     else
-        command wtp "$@"
+        command gw "$@"
     fi
 }`)
 
@@ -101,32 +101,32 @@ wtp() {
 }
 
 func printZshHook(w io.Writer) error {
-	_, err := fmt.Fprintln(w, `# wtp cd command hook for zsh
-wtp() {
+	_, err := fmt.Fprintln(w, `# gw cd command hook for zsh
+gw() {
     for arg in "$@"; do
         if [[ "$arg" == "--generate-shell-completion" ]]; then
-            command wtp "$@"
+            command gw "$@"
             return $?
         fi
     done
     if [[ "$1" == "cd" ]]; then
         local target_dir
         if [[ -z "$2" ]]; then
-            target_dir=$(command wtp cd 2>/dev/null)
+            target_dir=$(command gw cd 2>/dev/null)
         else
-            target_dir=$(command wtp cd "$2" 2>/dev/null)
+            target_dir=$(command gw cd "$2" 2>/dev/null)
         fi
         if [[ $? -eq 0 && -n "$target_dir" ]]; then
             cd "$target_dir"
         else
             if [[ -z "$2" ]]; then
-                command wtp cd
+                command gw cd
             else
-                command wtp cd "$2"
+                command gw cd "$2"
             fi
         fi
     else
-        command wtp "$@"
+        command gw "$@"
     fi
 }`)
 
@@ -134,32 +134,32 @@ wtp() {
 }
 
 func printFishHook(w io.Writer) error {
-	_, err := fmt.Fprintln(w, `# wtp cd command hook for fish
-function wtp
+	_, err := fmt.Fprintln(w, `# gw cd command hook for fish
+function gw
     for arg in $argv
         if test "$arg" = "--generate-shell-completion"
-            command wtp $argv
+            command gw $argv
             return $status
         end
     end
     if test "$argv[1]" = "cd"
         set -l target_dir
         if test -z "$argv[2]"
-            set target_dir (command wtp cd 2>/dev/null)
+            set target_dir (command gw cd 2>/dev/null)
         else
-            set target_dir (command wtp cd $argv[2] 2>/dev/null)
+            set target_dir (command gw cd $argv[2] 2>/dev/null)
         end
         if test $status -eq 0 -a -n "$target_dir"
             cd "$target_dir"
         else
             if test -z "$argv[2]"
-                command wtp cd
+                command gw cd
             else
-                command wtp cd $argv[2]
+                command gw cd $argv[2]
             end
         end
     else
-        command wtp $argv
+        command gw $argv
     end
 end`)
 

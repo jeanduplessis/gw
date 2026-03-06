@@ -82,12 +82,12 @@ func TestCdCommand_NoEnvironmentVariableDependency(t *testing.T) {
 	// This test ensures we maintain the "pure function" architecture
 
 	// Make sure no environment variables affect the core function
-	originalEnv := os.Getenv("WTP_SHELL_INTEGRATION")
+	originalEnv := os.Getenv("GW_SHELL_INTEGRATION")
 	t.Cleanup(func() {
 		if originalEnv != "" {
-			require.NoError(t, os.Setenv("WTP_SHELL_INTEGRATION", originalEnv))
+			require.NoError(t, os.Setenv("GW_SHELL_INTEGRATION", originalEnv))
 		} else {
-			require.NoError(t, os.Unsetenv("WTP_SHELL_INTEGRATION"))
+			require.NoError(t, os.Unsetenv("GW_SHELL_INTEGRATION"))
 		}
 	})
 
@@ -105,9 +105,9 @@ func TestCdCommand_NoEnvironmentVariableDependency(t *testing.T) {
 	for _, env := range envStates {
 		t.Run(env.name, func(t *testing.T) {
 			if env.value == "" {
-				require.NoError(t, os.Unsetenv("WTP_SHELL_INTEGRATION"))
+				require.NoError(t, os.Unsetenv("GW_SHELL_INTEGRATION"))
 			} else {
-				require.NoError(t, os.Setenv("WTP_SHELL_INTEGRATION", env.value))
+				require.NoError(t, os.Setenv("GW_SHELL_INTEGRATION", env.value))
 			}
 
 			// The core resolution function should work regardless of environment

@@ -1,11 +1,11 @@
-# wtp Architecture
+# gw Architecture
 
-This document describes the technical architecture and implementation details of wtp (Worktree Plus).
+This document describes the technical architecture and implementation details of gw (Git Worktree manager).
 
 ## Technical Architecture
 
 ```
-cmd/wtp/
+cmd/gw/
 ├── main.go         # Entry point
 ├── add.go          # Add command
 ├── remove.go       # Remove command
@@ -157,19 +157,19 @@ Following Git's own behavior:
 
 ### CD Command Implementation
 
-The `wtp cd` command uses a two-part architecture:
+The `gw cd` command uses a two-part architecture:
 
-1. **Go Command**: `wtp cd [worktree]` finds the worktree path and outputs it (defaults to the main worktree when omitted)
+1. **Go Command**: `gw cd [worktree]` finds the worktree path and outputs it (defaults to the main worktree when omitted)
 2. **Shell Function**: Wraps the Go command and performs the actual `cd`
 
 ### Shell Integration Flow
 
 ```bash
 # User types:
-wtp cd feature/auth
+gw cd feature/auth
 
 # Shell function intercepts, runs:
-command wtp cd feature/auth
+command gw cd feature/auth
 
 # Go command returns path:
 /path/to/worktrees/feature/auth
@@ -180,9 +180,9 @@ cd /path/to/worktrees/feature/auth
 
 ### Key Design Decisions
 
-- **Pure Path Output**: `wtp cd` only prints a path (no side effects), so hooks can safely consume it
+- **Pure Path Output**: `gw cd` only prints a path (no side effects), so hooks can safely consume it
 - **Shell Function Wrapper**: Required because child processes can't change the parent shell's directory
-- **Unified Setup Command**: `wtp shell-init <shell>` generates both completion and cd functionality
+- **Unified Setup Command**: `gw shell-init <shell>` generates both completion and cd functionality
 - **Cross-Shell Support**: Bash, Zsh, and Fish implementations
 
 ## Go 1.24 Tool Directive
@@ -228,7 +228,7 @@ func MultipleBranchesFound(branchName string, remotes []string) error {
     msg += fmt.Sprintf(`
 
 Solution: Specify the remote explicitly:
-  • wtp add --track %s/%s %s`, remotes[0], branchName, branchName)
+  • gw add --track %s/%s %s`, remotes[0], branchName, branchName)
     
     return errors.New(msg)
 }

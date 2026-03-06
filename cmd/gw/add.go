@@ -1,4 +1,4 @@
-// Package main provides the entrypoint for the wtp CLI commands.
+// Package main provides the entrypoint for the gw CLI commands.
 package main
 
 import (
@@ -27,13 +27,13 @@ func NewAddCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "add",
 		Usage:     "Create a new worktree",
-		UsageText: "wtp add <existing-branch>\n       wtp add -b <new-branch> [<commit>]",
+		UsageText: "gw add <existing-branch>\n       gw add -b <new-branch> [<commit>]",
 		Description: "Creates a new worktree for the specified branch. If the branch doesn't exist locally " +
 			"but exists on a remote, it will be automatically tracked.\n\n" +
 			"Examples:\n" +
-			"  wtp add feature/auth                    # Create worktree from existing branch\n" +
-			"  wtp add -b new-feature                  # Create new branch and worktree\n" +
-			"  wtp add -b hotfix/urgent main           # Create new branch from main commit",
+			"  gw add feature/auth                    # Create worktree from existing branch\n" +
+			"  gw add -b new-feature                  # Create new branch and worktree\n" +
+			"  gw add -b hotfix/urgent main           # Create new branch from main commit",
 		ShellComplete: completeBranches,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -290,7 +290,7 @@ func (e *BranchAlreadyExistsError) Error() string {
 The branch '%s' already exists in this repository.
 
 Solutions:
-  • Run 'wtp add %s' to create a worktree for the existing branch
+  • Run 'gw add %s' to create a worktree for the existing branch
   • Choose a different branch name with '--branch'
   • Delete the existing branch if it's no longer needed
 
@@ -326,8 +326,8 @@ func (e *MultipleBranchesError) Error() string {
 	return fmt.Sprintf(`branch '%s' exists in multiple remotes
 
 Use the --track flag to specify which remote to use:
-  • wtp add --track origin/%s %s
-  • wtp add --track upstream/%s %s
+  • gw add --track origin/%s %s
+  • gw add --track upstream/%s %s
 
 Original error: %v`, e.BranchName, e.BranchName, e.BranchName, e.BranchName, e.BranchName, e.GitError)
 }
@@ -352,7 +352,7 @@ func executePostCreateHooks(w io.Writer, cfg *config.Config, repoPath, workTreeP
 
 func validateAddInput(cmd *cli.Command) error {
 	if cmd.Args().Len() == 0 && cmd.String("branch") == "" {
-		return errors.BranchNameRequired("wtp add <existing-branch> | -b <new-branch> [<commit>]")
+		return errors.BranchNameRequired("gw add <existing-branch> | -b <new-branch> [<commit>]")
 	}
 
 	return nil
@@ -376,7 +376,7 @@ func setupRepoAndConfig() (*git.Repository, *config.Config, string, error) {
 
 	cfg, err := config.LoadConfig(mainRepoPath)
 	if err != nil {
-		configPath := mainRepoPath + "/.wtp.yml"
+		configPath := mainRepoPath + "/.gw.yml"
 		return nil, nil, "", errors.ConfigLoadFailed(configPath, err)
 	}
 
@@ -499,7 +499,7 @@ func displaySuccessMessageWithCommitish(
 	// Use the consistent worktree naming logic
 	isMain := isMainWorktree(workTreePath, mainRepoPath)
 	worktreeName := getWorktreeNameFromPath(workTreePath, cfg, mainRepoPath, isMain)
-	if _, err := fmt.Fprintf(w, "   wtp cd %s\n", worktreeName); err != nil {
+	if _, err := fmt.Fprintf(w, "   gw cd %s\n", worktreeName); err != nil {
 		return err
 	}
 

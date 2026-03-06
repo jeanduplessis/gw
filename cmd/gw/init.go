@@ -24,7 +24,7 @@ func NewInitCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "init",
 		Usage: "Initialize configuration file",
-		Description: "Creates a .wtp.yml configuration file in the repository root " +
+		Description: "Creates a .gw.yml configuration file in the repository root " +
 			"with example hooks and settings.",
 		Action: initCommand,
 	}
@@ -63,7 +63,7 @@ func initCommand(_ context.Context, cmd *cli.Command) error {
 	}
 
 	// Create configuration with comments
-	configContent := `# Worktree Plus Configuration
+	configContent := `# gw Configuration
 version: "1.0"
 
 # Default settings for worktrees
@@ -82,7 +82,7 @@ hooks:
 
     # Example: Run a command to show all worktrees
     - type: command
-      command: wtp list
+      command: gw list
 
     # More examples (commented out):
     

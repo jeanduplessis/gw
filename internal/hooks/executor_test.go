@@ -630,7 +630,7 @@ func TestExecutePostCreateHooks_EnvironmentVariables(t *testing.T) {
 			PostCreate: []config.Hook{
 				{
 					Type:    config.HookTypeCommand,
-					Command: "echo WORKTREE=$GIT_WTP_WORKTREE_PATH REPO=$GIT_WTP_REPO_ROOT",
+					Command: "echo WORKTREE=$GIT_GW_WORKTREE_PATH REPO=$GIT_GW_REPO_ROOT",
 				},
 			},
 		},

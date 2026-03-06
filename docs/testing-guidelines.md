@@ -1,6 +1,6 @@
-# Testing Guidelines for wtp
+# Testing Guidelines for gw
 
-This document establishes testing standards and best practices for the wtp
+This document establishes testing standards and best practices for the gw
 project, based on lessons learned from implementing a specification-centered
 testing approach.
 
@@ -120,7 +120,7 @@ func TestAddCommand_ExistingBranch(t *testing.T) {
 // when switching between features, improving developer productivity.
 func TestUserCreatesWorktree_WithExistingLocalBranch_ShouldCreateWorktreeAtDefaultPath(t *testing.T) {
     // Given: User has an existing local branch named "feature/auth"
-    // When: User runs "wtp add feature/auth"
+    // When: User runs "gw add feature/auth"
     // Then: Worktree should be created successfully
 }
 ```
@@ -186,7 +186,7 @@ func TestAddCommand_ExistingBranch(t *testing.T) {
     // User Story: As a developer working on a feature branch...
     // Business Value: This eliminates the need to stash changes...
     // Given: User has an existing local branch named "feature/auth"
-    // When: User runs "wtp add feature/auth"
+    // When: User runs "gw add feature/auth"
     // Then: Worktree should be created successfully
 
     // ... test implementation

@@ -86,17 +86,17 @@ func TestFlagCandidateFromOSArgsSentinel(t *testing.T) {
 	original := os.Args
 	t.Cleanup(func() { os.Args = original })
 
-	os.Args = []string{"wtp", "remove", "target", "-", "--generate-shell-completion"}
+	os.Args = []string{"gw", "remove", "target", "-", "--generate-shell-completion"}
 	candidate, ok := flagCandidateFromOSArgs()
 	require.True(t, ok)
 	require.Equal(t, "target", candidate)
 
-	os.Args = []string{"wtp", "remove", "target", "--", "--generate-shell-completion"}
+	os.Args = []string{"gw", "remove", "target", "--", "--generate-shell-completion"}
 	candidate, ok = flagCandidateFromOSArgs()
 	require.True(t, ok)
 	require.Equal(t, "target", candidate)
 
-	os.Args = []string{"wtp", "remove", "target", "-", "--generate-shell-completion", "--generate-shell-completion"}
+	os.Args = []string{"gw", "remove", "target", "-", "--generate-shell-completion", "--generate-shell-completion"}
 	candidate, ok = flagCandidateFromOSArgs()
 	require.True(t, ok)
 	require.Equal(t, "target", candidate)
@@ -106,7 +106,7 @@ func TestMaybeCompleteFlagSuggestions_UsesOSArgsWhenCurrentEmpty(t *testing.T) {
 	original := os.Args
 	t.Cleanup(func() { os.Args = original })
 
-	os.Args = []string{"wtp", "remove", "--w", "--generate-shell-completion"}
+	os.Args = []string{"gw", "remove", "--w", "--generate-shell-completion"}
 
 	var buf bytes.Buffer
 	cmd := &cli.Command{

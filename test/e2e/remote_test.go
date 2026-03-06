@@ -122,7 +122,7 @@ func TestRemoteConfiguration(t *testing.T) {
 
 		repo.CreateRemoteBranch("invalid", "test-branch")
 
-		// wtp should still work with the remote branch
+		// gw should still work with the remote branch
 		output, err := repo.RunWTP("add", "test-branch")
 		framework.AssertNoError(t, err)
 		framework.AssertWorktreeCreated(t, output, "test-branch")

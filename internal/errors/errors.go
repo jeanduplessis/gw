@@ -1,4 +1,4 @@
-// Package errors provides user-friendly error helpers for the wtp CLI.
+// Package errors provides user-friendly error helpers for the gw CLI.
 package errors
 
 import (
@@ -41,9 +41,9 @@ func BranchNameRequired(commandExample string) error {
 Usage: %s
 
 Examples:
-  • wtp add feature/auth
-  • wtp add -b new-feature
-  • wtp add --track origin/main main`, commandExample)
+  • gw add feature/auth
+  • gw add -b new-feature
+  • gw add --track origin/main main`, commandExample)
 	return errors.New(msg)
 }
 
@@ -51,14 +51,14 @@ Examples:
 func WorktreeNameRequiredForRemove() error {
 	msg := `worktree name is required
 
-Usage: wtp remove <worktree-name>
+Usage: gw remove <worktree-name>
 
 Examples:
-  • wtp remove feature/auth
-  • wtp remove --with-branch feature/auth
-  • wtp remove --force feature/auth
+  • gw remove feature/auth
+  • gw remove --with-branch feature/auth
+  • gw remove --force feature/auth
 
-Tip: Run 'wtp list' to see available worktrees`
+Tip: Run 'gw list' to see available worktrees`
 	return errors.New(msg)
 }
 
@@ -88,7 +88,7 @@ func WorktreeNotFound(name string, availableWorktrees []string) error {
 		msg += "\n\nNo worktrees found."
 	}
 
-	msg += "\n\nTip: Run 'wtp list' to see all worktrees"
+	msg += "\n\nTip: Run 'gw list' to see all worktrees"
 	return errors.New(msg)
 }
 
@@ -110,7 +110,7 @@ Cause: Branch or commit does not exist
 Solutions:
   • Check the branch name spelling
   • Use 'git branch -a' to see available branches
-  • Create the branch first with 'wtp add -b <branch-name>'`
+  • Create the branch first with 'gw add -b <branch-name>'`
 	} else if strings.Contains(gitErrorStr, "destination path") && strings.Contains(gitErrorStr, "already exists") {
 		msg += `
 
@@ -134,7 +134,7 @@ func WorktreeRemovalFailed(path string, gitError error) error {
 	if strings.Contains(errorStr, "not a working tree") {
 		suggestions = append(suggestions,
 			"Check if the worktree path is correct",
-			"Run 'wtp list' to see available worktrees")
+			"Run 'gw list' to see available worktrees")
 	} else if strings.Contains(errorStr, "contains modified or untracked files") {
 		suggestions = append(suggestions,
 			"Commit or stash changes in the worktree first",
@@ -164,7 +164,7 @@ func WorktreeRemovalFailed(path string, gitError error) error {
 func CannotRemoveCurrentWorktree(worktreeName, path string) error {
 	msg := fmt.Sprintf("cannot remove worktree '%s' while you are currently inside it", worktreeName)
 	msg += fmt.Sprintf("\n\nCurrent location: %s", path)
-	msg += "\n\nTip: Run 'wtp cd @' or 'wtp cd <another-worktree>' to switch before removing."
+	msg += "\n\nTip: Run 'gw cd @' or 'gw cd <another-worktree>' to switch before removing."
 	return errors.New(msg)
 }
 
@@ -206,17 +206,17 @@ Cause: YAML syntax error in configuration file
 Solutions:
   • Check YAML syntax and indentation
   • Validate YAML at https://yamllint.com/
-  • Run 'wtp init' to recreate the configuration`
+  • Run 'gw init' to recreate the configuration`
 	} else if strings.Contains(parseErrorStr, "no such file") {
 		msg += `
 
 Cause: Configuration file does not exist
-Solution: Run 'wtp init' to create a configuration file`
+Solution: Run 'gw init' to create a configuration file`
 	} else if strings.Contains(parseErrorStr, "permission denied") {
 		msg += `
 
 Cause: Permission denied reading configuration file
-Solution: Check file permissions with 'ls -la .wtp.yml'`
+Solution: Check file permissions with 'ls -la .gw.yml'`
 	}
 
 	msg += fmt.Sprintf("\n\nOriginal error: %v", parseError)
@@ -229,8 +229,8 @@ func ConfigAlreadyExists(configPath string) error {
 
 Options:
   • Edit the existing file manually
-  • Delete it and run 'wtp init' again
-  • Use 'wtp init --force' to overwrite (if that flag exists)`, configPath)
+  • Delete it and run 'gw init' again
+  • Use 'gw init --force' to overwrite (if that flag exists)`, configPath)
 	return errors.New(msg)
 }
 
@@ -266,10 +266,10 @@ func ShellIntegrationRequired() error {
 	msg := `cd command requires shell integration
 
 Setup:
-  • Homebrew users: press TAB after typing 'wtp' once (automatic)
-  • Other installs: eval "$(wtp shell-init <shell>)" in your shell profile (~/.bashrc, ~/.zshrc, etc.)
+  • Homebrew users: press TAB after typing 'gw' once (automatic)
+  • Other installs: eval "$(gw shell-init <shell>)" in your shell profile (~/.bashrc, ~/.zshrc, etc.)
 
-Help: Run 'wtp shell-init --help' for more details`
+Help: Run 'gw shell-init --help' for more details`
 	return errors.New(msg)
 }
 
@@ -284,7 +284,7 @@ func UnsupportedShell(shell string, supportedShells []string) error {
 		}
 	}
 
-	msg += "\n\nWorkaround: You can still use wtp without shell integration"
+	msg += "\n\nWorkaround: You can still use gw without shell integration"
 	return errors.New(msg)
 }
 
@@ -295,7 +295,7 @@ func BranchNotFound(branchName string) error {
 Suggestions:
   • Check the branch name spelling
   • Run 'git branch -a' to see all branches
-  • Create a new branch with 'wtp add -b %s'
+  • Create a new branch with 'gw add -b %s'
   • Fetch latest changes with 'git fetch'`, branchName, branchName)
 	return errors.New(msg)
 }
@@ -306,10 +306,10 @@ func MultipleBranchesFound(branchName string, remotes []string) error {
 	msg += fmt.Sprintf(`
 
 Solution: Specify the remote explicitly:
-  • wtp add --track %s/%s %s`, remotes[0], branchName, branchName)
+  • gw add --track %s/%s %s`, remotes[0], branchName, branchName)
 
 	if len(remotes) > 1 {
-		msg += fmt.Sprintf("\n  • wtp add --track %s/%s %s", remotes[1], branchName, branchName)
+		msg += fmt.Sprintf("\n  • gw add --track %s/%s %s", remotes[1], branchName, branchName)
 	}
 
 	return errors.New(msg)
@@ -333,7 +333,7 @@ Solutions:
 
 Cause: File or command not found
 Solutions:
-  • Check file paths in .wtp.yml
+  • Check file paths in .gw.yml
   • Ensure the command exists in PATH
   • Use absolute paths for files`
 	} else if strings.Contains(errorStr, "command not found") {
@@ -342,7 +342,7 @@ Solutions:
 Cause: Command not found
 Solutions:
   • Install the required command
-  • Check command spelling in .wtp.yml
+  • Check command spelling in .gw.yml
   • Use full path to command`
 	}
 

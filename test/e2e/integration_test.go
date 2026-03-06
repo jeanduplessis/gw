@@ -25,7 +25,7 @@ defaults:
 		repo.WriteConfig(config)
 
 		// Verify config file exists
-		framework.AssertFileExists(t, repo, ".wtp.yml")
+		framework.AssertFileExists(t, repo, ".gw.yml")
 
 		repo.CreateBranch("feature/test")
 

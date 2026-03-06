@@ -321,7 +321,7 @@ func TestRemoveCommand_ValidationErrors(t *testing.T) {
 			}
 
 			ctx := context.Background()
-			cmdArgs := []string{"wtp", "remove"}
+			cmdArgs := []string{"gw", "remove"}
 			cmdArgs = append(cmdArgs, tt.args...)
 
 			err := app.Run(ctx, cmdArgs)
@@ -345,7 +345,7 @@ func TestRemoveCommand_NotInGitRepo(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	err = app.Run(ctx, []string{"wtp", "remove", "test"})
+	err = app.Run(ctx, []string{"gw", "remove", "test"})
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "not in a git repository")
 }

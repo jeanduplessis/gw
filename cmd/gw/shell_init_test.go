@@ -33,7 +33,7 @@ func TestNewShellInitCommand(t *testing.T) {
 
 func TestShellInitCommand_OutputsValidScripts(t *testing.T) {
 	// Note: These tests can't easily verify the actual output without
-	// executing the wtp binary, which would create a circular dependency.
+	// executing the gw binary, which would create a circular dependency.
 	oldRunCompletion := runCompletionCommand
 	runCompletionCommand = func(shell string) ([]byte, error) {
 		return []byte("completion-" + shell), nil
@@ -71,7 +71,7 @@ func TestShellInitCommand_OutputsValidScripts(t *testing.T) {
 			}
 
 			ctx := context.Background()
-			err := app.Run(ctx, []string{"wtp", "shell-init", tt.shell})
+			err := app.Run(ctx, []string{"gw", "shell-init", tt.shell})
 			assert.NoError(t, err)
 			assert.Contains(t, buf.String(), "completion-"+tt.shell)
 		})

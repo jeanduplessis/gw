@@ -89,8 +89,8 @@ func TestShellCompletionCommands(t *testing.T) {
 		framework.AssertNoError(t, err)
 		framework.AssertOutputContains(t, output, "complete")
 		framework.AssertTrue(t,
-			strings.Contains(output, "wtp") ||
-				strings.Contains(output, "_wtp"),
+			strings.Contains(output, "gw") ||
+				strings.Contains(output, "_gw"),
 			"Should output bash completion script")
 	})
 

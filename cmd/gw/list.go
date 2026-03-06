@@ -222,7 +222,7 @@ func parseWorktreesFromOutput(output string) []git.Worktree {
 	return worktrees
 }
 
-// isWorktreeManagedList determines if a worktree is managed by wtp (for list command)
+// isWorktreeManagedList determines if a worktree is managed by gw (for list command)
 func isWorktreeManagedList(worktreePath string, cfg *config.Config, mainRepoPath string, isMain bool) bool {
 	return isWorktreeManagedCommon(worktreePath, cfg, mainRepoPath, isMain)
 }
@@ -475,7 +475,7 @@ type listDisplayOptions struct {
 func resolveListDisplayOptions(cmd *cli.Command, w io.Writer) listDisplayOptions {
 	maxPathWidth := cmd.Int("max-path-width")
 	if maxPathWidth == defaultMaxPathWidth && !cmd.IsSet("max-path-width") {
-		if envValue := os.Getenv("WTP_LIST_MAX_PATH"); envValue != "" {
+		if envValue := os.Getenv("GW_LIST_MAX_PATH"); envValue != "" {
 			if parsed, err := strconv.Atoi(envValue); err == nil && parsed > 0 {
 				maxPathWidth = parsed
 			}

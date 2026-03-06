@@ -6,9 +6,9 @@ before:
     - go generate ./...
 
 builds:
-  - id: wtp
-    binary: wtp
-    main: ./cmd/wtp
+  - id: gw
+    binary: gw
+    main: ./cmd/gw
     env:
       - CGO_ENABLED=0
     goos:
@@ -29,10 +29,10 @@ builds:
       - -trimpath
 
 archives:
-  - id: wtp
+  - id: gw
     format: tar.gz
     name_template: >-
-      wtp_
+      gw_
       {{- .Version }}_
       {{- title .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
@@ -69,7 +69,7 @@ changelog:
       order: 999
 
 brews:
-  - name: wtp
+  - name: gw
     repository:
       owner: satococoa
       name: homebrew-tap
@@ -81,92 +81,92 @@ brews:
       email: bot@goreleaser.com
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
     homepage: "https://github.com/satococoa/wtp"
-    description: "Worktree Plus - Enhanced worktree management with automated setup and hooks"
+    description: "gw - Git worktree management with automated setup and hooks"
     license: "MIT"
     skip_upload: auto
     dependencies:
       - name: git
     install: |
-      bin.install "wtp"
+      bin.install "gw"
 
-      (bash_completion/"wtp").write <<~'EOS'
-        # wtp lazy shell-init for bash (installed via Homebrew)
-        _wtp_lazy_init() {
-          if [[ -z "${WTP_SHELL_INIT_DONE:-}" ]]; then
-            local __wtp_init __wtp_status
-            __wtp_init="$(command wtp shell-init bash 2>/dev/null)"
-            __wtp_status=$?
-            if [[ $__wtp_status -ne 0 || -z "$__wtp_init" ]]; then
-              __wtp_init="$(command wtp completion bash 2>/dev/null)"
-              __wtp_status=$?
+      (bash_completion/"gw").write <<~'EOS'
+        # gw lazy shell-init for bash (installed via Homebrew)
+        _gw_lazy_init() {
+          if [[ -z "${GW_SHELL_INIT_DONE:-}" ]]; then
+            local __gw_init __gw_status
+            __gw_init="$(command gw shell-init bash 2>/dev/null)"
+            __gw_status=$?
+            if [[ $__gw_status -ne 0 || -z "$__gw_init" ]]; then
+              __gw_init="$(command gw completion bash 2>/dev/null)"
+              __gw_status=$?
             fi
-            if [[ $__wtp_status -ne 0 || -z "$__wtp_init" ]]; then
+            if [[ $__gw_status -ne 0 || -z "$__gw_init" ]]; then
               return 124
             fi
 
-            eval "$__wtp_init"
-            export WTP_SHELL_INIT_DONE=1
+            eval "$__gw_init"
+            export GW_SHELL_INIT_DONE=1
           fi
 
-          if declare -F __wtp_bash_autocomplete >/dev/null 2>&1; then
-            __wtp_bash_autocomplete "$@"
-          elif declare -F _wtp >/dev/null 2>&1; then
-            _wtp "$@"
+          if declare -F __gw_bash_autocomplete >/dev/null 2>&1; then
+            __gw_bash_autocomplete "$@"
+          elif declare -F _gw >/dev/null 2>&1; then
+            _gw "$@"
           fi
         }
 
-        complete -o bashdefault -o default -o nospace -F _wtp_lazy_init wtp
+        complete -o bashdefault -o default -o nospace -F _gw_lazy_init gw
       EOS
 
-      (zsh_completion/"_wtp").write <<~'EOS'
-        #compdef wtp
+      (zsh_completion/"_gw").write <<~'EOS'
+        #compdef gw
 
-        _wtp_lazy_init() {
-          if [[ -z ${WTP_SHELL_INIT_DONE-} ]]; then
-            local __wtp_init __wtp_status
-            __wtp_init="$(command wtp shell-init zsh 2>/dev/null)"
-            __wtp_status=$?
-            if [[ $__wtp_status -ne 0 || -z "$__wtp_init" ]]; then
-              __wtp_init="$(command wtp completion zsh 2>/dev/null)"
-              __wtp_status=$?
+        _gw_lazy_init() {
+          if [[ -z ${GW_SHELL_INIT_DONE-} ]]; then
+            local __gw_init __gw_status
+            __gw_init="$(command gw shell-init zsh 2>/dev/null)"
+            __gw_status=$?
+            if [[ $__gw_status -ne 0 || -z "$__gw_init" ]]; then
+              __gw_init="$(command gw completion zsh 2>/dev/null)"
+              __gw_status=$?
             fi
-            if [[ $__wtp_status -ne 0 || -z "$__wtp_init" ]]; then
+            if [[ $__gw_status -ne 0 || -z "$__gw_init" ]]; then
               return 1
             fi
 
-            eval "$__wtp_init"
-            export WTP_SHELL_INIT_DONE=1
+            eval "$__gw_init"
+            export GW_SHELL_INIT_DONE=1
           fi
 
-          if typeset -f _wtp >/dev/null 2>&1; then
-            _wtp "$@"
+          if typeset -f _gw >/dev/null 2>&1; then
+            _gw "$@"
           fi
         }
 
-        compdef _wtp_lazy_init wtp
+        compdef _gw_lazy_init gw
       EOS
 
-      (fish_completion/"wtp.fish").write <<~'EOS'
-        function __wtp_lazy_setup --on-event fish_prompt --description 'Lazy shell-init for wtp (Homebrew)'
-            functions -e __wtp_lazy_setup
+      (fish_completion/"gw.fish").write <<~'EOS'
+        function __gw_lazy_setup --on-event fish_prompt --description 'Lazy shell-init for gw (Homebrew)'
+            functions -e __gw_lazy_setup
 
-            if not set -q WTP_SHELL_INIT_DONE
-                command wtp shell-init fish ^/dev/null | source
-                set -l __wtp_status $status
-                if test $__wtp_status -ne 0
-                    command wtp completion fish ^/dev/null | source
-                    set __wtp_status $status
+            if not set -q GW_SHELL_INIT_DONE
+                command gw shell-init fish ^/dev/null | source
+                set -l __gw_status $status
+                if test $__gw_status -ne 0
+                    command gw completion fish ^/dev/null | source
+                    set __gw_status $status
                 end
-                if test $__wtp_status -ne 0
+                if test $__gw_status -ne 0
                     return
                 end
 
-                set -gx WTP_SHELL_INIT_DONE 1
+                set -gx GW_SHELL_INIT_DONE 1
             end
         end
       EOS
     test: |
-      system "#{bin}/wtp", "--help"
+      system "#{bin}/gw", "--help"
 
 release:
   github:
@@ -176,7 +176,7 @@ release:
   prerelease: auto
   name_template: "{{.ProjectName}} {{.Version}}"
   header: |
-    ## Worktree Plus (wtp) {{.Version}}
+    ## gw {{.Version}}
 
     Welcome to this new release!
 
@@ -185,7 +185,7 @@ release:
 
     ### Homebrew
     ```bash
-    brew install satococoa/tap/wtp
+    brew install satococoa/tap/gw
     ```
 
     ### Manual Installation
@@ -194,10 +194,10 @@ release:
     **Full Changelog**: https://github.com/satococoa/wtp/compare/{{.PreviousTag}}...{{.Tag}}
 
 nfpms:
-  - id: wtp
-    package_name: wtp
+  - id: gw
+    package_name: gw
     file_name_template: >-
-      wtp_
+      gw_
       {{- .Version }}_
       {{- .Os }}_
       {{- if eq .Arch "amd64" }}x86_64
@@ -207,9 +207,7 @@ nfpms:
     homepage: https://github.com/satococoa/wtp
     maintainer: satococoa <satococoa@example.com>
     description: |-
-      Worktree Plus - Enhanced worktree management with automated setup and hooks.
-      A powerful Git worktree management tool that extends git's worktree functionality
-      with automated setup, branch tracking, and project-specific hooks.
+      gw - Git worktree management with automated setup and hooks.
     license: MIT
     formats:
       - deb

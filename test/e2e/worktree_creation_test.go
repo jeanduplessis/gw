@@ -27,7 +27,7 @@ func TestUserCreatesWorktree_WithExistingLocalBranch_ShouldCreateWorktreeAtDefau
 	repo := env.CreateTestRepo("user-creates-worktree")
 	repo.CreateBranch("feature/auth")
 
-	// When: User runs "wtp add feature/auth"
+	// When: User runs "gw add feature/auth"
 	output, err := repo.RunWTP("add", "feature/auth")
 
 	// Then: Worktree should be created successfully
@@ -55,7 +55,7 @@ func TestUserCreatesWorktree_WithNewBranchFlag_ShouldCreateBranchAndWorktree(t *
 
 	repo := env.CreateTestRepo("user-creates-new-branch")
 
-	// When: User runs "wtp add --branch feature/payment"
+	// When: User runs "gw add --branch feature/payment"
 	output, err := repo.RunWTP("add", "--branch", "feature/payment")
 
 	// Then: New branch and worktree should be created
@@ -91,7 +91,7 @@ func TestUserCreatesWorktree_WithoutBranchName_ShouldShowBranchRequiredError(t *
 
 	repo := env.CreateTestRepo("user-no-branch")
 
-	// When: User runs "wtp add" with no arguments
+	// When: User runs "gw add" with no arguments
 	output, err := repo.RunWTP("add")
 
 	// Then: User should receive a clear error message
@@ -121,7 +121,7 @@ func TestUserCreatesWorktree_WhenPathAlreadyExists_ShouldRequireForceFlag(t *tes
 	_, err := repo.RunWTP("add", "feature/auth")
 	framework.AssertNoError(t, err)
 
-	// When: User tries to run "wtp add feature/auth" again
+	// When: User tries to run "gw add feature/auth" again
 	output, err := repo.RunWTP("add", "feature/auth")
 
 	// Then: User should receive guidance about the conflict
@@ -132,7 +132,7 @@ func TestUserCreatesWorktree_WhenPathAlreadyExists_ShouldRequireForceFlag(t *tes
 // TestUserCreatesWorktree_WithBranchFromSpecificCommit tests
 // creating a new branch from a specific commit or branch.
 //
-// User Story: As a developer, when I use "wtp add -b new-branch main",
+// User Story: As a developer, when I use "gw add -b new-branch main",
 // I want the new branch to be created from the main branch, not from the current branch.
 //
 // Business Value: Allows developers to create feature branches from specific
@@ -155,7 +155,7 @@ func TestUserCreatesWorktree_WithBranchFromSpecificCommit(t *testing.T) {
 	mainCommit := repo.GetBranchCommitHash("main")
 	featureCommit := repo.GetCommitHash() // Current HEAD
 
-	// When: User runs "wtp add -b new-feature main"
+	// When: User runs "gw add -b new-feature main"
 	output, err := repo.RunWTP("add", "-b", "new-feature", "main")
 
 	// Then: Command should succeed

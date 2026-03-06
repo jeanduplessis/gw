@@ -85,7 +85,7 @@ func TestErrorMessages(t *testing.T) {
 		framework.AssertTrue(t,
 			strings.Contains(output, "Usage:") ||
 				strings.Contains(output, "Examples:") ||
-				strings.Contains(output, "wtp add"),
+				strings.Contains(output, "gw add"),
 			"Should show usage examples for missing branch name")
 	})
 
@@ -108,7 +108,7 @@ func TestErrorMessages(t *testing.T) {
 			strings.Contains(output, "-b") ||
 				strings.Contains(output, "specify") ||
 				strings.Contains(output, "remote") ||
-				strings.Contains(output, "wtp add"),
+				strings.Contains(output, "gw add"),
 			"Should provide helpful guidance for multiple remotes")
 	})
 }

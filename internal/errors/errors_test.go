@@ -69,13 +69,13 @@ func TestGitCommandFailed(t *testing.T) {
 }
 
 func TestBranchNameRequired(t *testing.T) {
-	commandExample := "wtp add <branch-name>"
+	commandExample := "gw add <branch-name>"
 	err := BranchNameRequired(commandExample)
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "branch name is required")
 	assert.Contains(t, err.Error(), commandExample)
-	assert.Contains(t, err.Error(), "wtp add feature/auth")
+	assert.Contains(t, err.Error(), "gw add feature/auth")
 	assert.Contains(t, err.Error(), "Examples:")
 }
 
@@ -84,9 +84,9 @@ func TestWorktreeNameRequiredForRemove(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "worktree name is required")
-	assert.Contains(t, err.Error(), "wtp remove")
-	assert.Contains(t, err.Error(), "wtp remove --with-branch")
-	assert.Contains(t, err.Error(), "wtp list")
+	assert.Contains(t, err.Error(), "gw remove")
+	assert.Contains(t, err.Error(), "gw remove --with-branch")
+	assert.Contains(t, err.Error(), "gw list")
 }
 
 func TestInvalidBranchName(t *testing.T) {
@@ -116,7 +116,7 @@ func TestWorktreeNotFound(t *testing.T) {
 				"main",
 				"develop",
 				"feature/auth",
-				"wtp list",
+				"gw list",
 			},
 		},
 		{
@@ -126,7 +126,7 @@ func TestWorktreeNotFound(t *testing.T) {
 			expected: []string{
 				"worktree 'missing' not found",
 				"No worktrees found",
-				"wtp list",
+				"gw list",
 			},
 		},
 	}
@@ -208,7 +208,7 @@ func TestCannotRemoveCurrentWorktree(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "cannot remove worktree 'feature/foo'")
 	assert.Contains(t, err.Error(), "Current location: /repo/.worktrees/feature/foo")
-	assert.Contains(t, err.Error(), "wtp cd @")
+	assert.Contains(t, err.Error(), "gw cd @")
 }
 
 func TestBranchRemovalFailed(t *testing.T) {
@@ -265,12 +265,12 @@ func TestConfigLoadFailed(t *testing.T) {
 	}{
 		{
 			name:   "file not found",
-			path:   ".wtp.yml",
+			path:   ".gw.yml",
 			reason: fmt.Errorf("no such file or directory"),
 			expected: []string{
-				"failed to load configuration from '.wtp.yml'",
+				"failed to load configuration from '.gw.yml'",
 				"no such file or directory",
-				"wtp init",
+				"gw init",
 			},
 		},
 		{
@@ -299,7 +299,7 @@ func TestConfigLoadFailed(t *testing.T) {
 }
 
 func TestConfigAlreadyExists(t *testing.T) {
-	path := ".wtp.yml"
+	path := ".gw.yml"
 	err := ConfigAlreadyExists(path)
 
 	assert.Error(t, err)
@@ -360,7 +360,7 @@ func TestShellIntegrationRequired(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "shell integration")
 	assert.Contains(t, err.Error(), "eval")
-	assert.Contains(t, err.Error(), "wtp shell-init")
+	assert.Contains(t, err.Error(), "gw shell-init")
 	assert.Contains(t, err.Error(), "Setup:")
 }
 
@@ -427,7 +427,7 @@ func TestErrorMessages_HelpfulContent(t *testing.T) {
 		{
 			name:     "WorktreeNameRequiredForRemove contains examples",
 			errorFn:  WorktreeNameRequiredForRemove,
-			keywords: []string{"wtp remove", "wtp list"},
+			keywords: []string{"gw remove", "gw list"},
 		},
 		{
 			name:     "ShellIntegrationRequired contains setup",

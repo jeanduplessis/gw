@@ -43,9 +43,9 @@ func TestHookCommand_GeneratesValidShellScripts(t *testing.T) {
 			name:  "bash generates valid hook",
 			shell: "bash",
 			contains: []string{
-				"wtp()",
+				"gw()",
 				"if [[ \"$1\" == \"cd\" ]]",
-				"command wtp cd",
+				"command gw cd",
 				"cd \"$target_dir\"",
 			},
 		},
@@ -53,9 +53,9 @@ func TestHookCommand_GeneratesValidShellScripts(t *testing.T) {
 			name:  "zsh generates valid hook",
 			shell: "zsh",
 			contains: []string{
-				"wtp()",
+				"gw()",
 				"if [[ \"$1\" == \"cd\" ]]",
-				"command wtp cd",
+				"command gw cd",
 				"cd \"$target_dir\"",
 			},
 		},
@@ -63,9 +63,9 @@ func TestHookCommand_GeneratesValidShellScripts(t *testing.T) {
 			name:  "fish generates valid hook",
 			shell: "fish",
 			contains: []string{
-				"function wtp",
+				"function gw",
 				"if test \"$argv[1]\" = \"cd\"",
-				"command wtp cd",
+				"command gw cd",
 				"cd \"$target_dir\"",
 			},
 		},
@@ -83,7 +83,7 @@ func TestHookCommand_GeneratesValidShellScripts(t *testing.T) {
 			app.Writer = &buf
 
 			ctx := context.Background()
-			err := app.Run(ctx, []string{"wtp", "hook", tt.shell})
+			err := app.Run(ctx, []string{"gw", "hook", tt.shell})
 			assert.NoError(t, err)
 
 			output := buf.String()
@@ -95,7 +95,7 @@ func TestHookCommand_GeneratesValidShellScripts(t *testing.T) {
 			}
 
 			// Essential behavior: no legacy environment variable dependency
-			assert.NotContains(t, output, "WTP_SHELL_INTEGRATION")
+			assert.NotContains(t, output, "GW_SHELL_INTEGRATION")
 		})
 	}
 }
@@ -113,9 +113,9 @@ func TestFishHook_VariableScoping(t *testing.T) {
 		"target_dir must be declared outside if/else block for proper fish scoping")
 
 	// Inside if/else blocks, assignment should NOT use -l flag
-	assert.Contains(t, output, "set target_dir (command wtp cd 2>/dev/null)",
+	assert.Contains(t, output, "set target_dir (command gw cd 2>/dev/null)",
 		"target_dir assignment in if block should not use -l flag")
-	assert.Contains(t, output, "set target_dir (command wtp cd $argv[2] 2>/dev/null)",
+	assert.Contains(t, output, "set target_dir (command gw cd $argv[2] 2>/dev/null)",
 		"target_dir assignment in else block should not use -l flag")
 }
 
@@ -130,12 +130,12 @@ func TestHookScripts_HandleEdgeCases(t *testing.T) {
 			name:  "bash hook supports no-arg cd",
 			shell: "bash",
 			requiredLogic: []string{
-				"if [[ -z \"$2\" ]]",               // No-arg branch
-				"target_dir=$(command wtp cd",      // Uses `wtp cd` default behavior
-				"target_dir=$(command wtp cd \"$2", // Uses explicit worktree name when present
+				"if [[ -z \"$2\" ]]",              // No-arg branch
+				"target_dir=$(command gw cd",      // Uses `gw cd` default behavior
+				"target_dir=$(command gw cd \"$2", // Uses explicit worktree name when present
 			},
 			notContains: []string{
-				"Usage: wtp cd <worktree>",
+				"Usage: gw cd <worktree>",
 				"echo \"Usage:",
 			},
 		},
@@ -143,12 +143,12 @@ func TestHookScripts_HandleEdgeCases(t *testing.T) {
 			name:  "zsh hook supports no-arg cd",
 			shell: "zsh",
 			requiredLogic: []string{
-				"if [[ -z \"$2\" ]]",               // No-arg branch
-				"target_dir=$(command wtp cd",      // Uses `wtp cd` default behavior
-				"target_dir=$(command wtp cd \"$2", // Uses explicit worktree name when present
+				"if [[ -z \"$2\" ]]",              // No-arg branch
+				"target_dir=$(command gw cd",      // Uses `gw cd` default behavior
+				"target_dir=$(command gw cd \"$2", // Uses explicit worktree name when present
 			},
 			notContains: []string{
-				"Usage: wtp cd <worktree>",
+				"Usage: gw cd <worktree>",
 				"echo \"Usage:",
 			},
 		},
@@ -156,13 +156,13 @@ func TestHookScripts_HandleEdgeCases(t *testing.T) {
 			name:  "fish hook supports no-arg cd",
 			shell: "fish",
 			requiredLogic: []string{
-				"if test -z \"$argv[2]\"",     // No-arg branch
-				"set target_dir (command wtp", // Uses `wtp cd` (no -l inside block)
-				"command wtp cd $argv[2]",     // Uses explicit worktree name when present
-				"cd \"$target_dir\"",          // Handles spaces safely
+				"if test -z \"$argv[2]\"",    // No-arg branch
+				"set target_dir (command gw", // Uses `gw cd` (no -l inside block)
+				"command gw cd $argv[2]",     // Uses explicit worktree name when present
+				"cd \"$target_dir\"",         // Handles spaces safely
 			},
 			notContains: []string{
-				"Usage: wtp cd <worktree>",
+				"Usage: gw cd <worktree>",
 				"echo \"Usage:",
 			},
 		},

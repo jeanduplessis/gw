@@ -16,7 +16,7 @@ func TestMain(t *testing.T) {
 	t.Run("app setup", func(t *testing.T) {
 		app := createApp()
 		assert.NotNil(t, app)
-		assert.Equal(t, "wtp", app.Name)
+		assert.Equal(t, "gw", app.Name)
 		assert.Equal(t, "Enhanced Git worktree management", app.Usage)
 		assert.NotEmpty(t, app.Description)
 		assert.True(t, app.EnableShellCompletion)
@@ -60,11 +60,11 @@ func TestAppRun_Version(t *testing.T) {
 	app.Writer = &buf
 
 	ctx := context.Background()
-	err := app.Run(ctx, []string{"wtp", "--version"})
+	err := app.Run(ctx, []string{"gw", "--version"})
 
 	assert.NoError(t, err)
 	output := buf.String()
-	assert.Contains(t, output, "wtp version")
+	assert.Contains(t, output, "gw version")
 }
 
 func TestAppRun_Help(t *testing.T) {
@@ -73,13 +73,13 @@ func TestAppRun_Help(t *testing.T) {
 	app.Writer = &buf
 
 	ctx := context.Background()
-	err := app.Run(ctx, []string{"wtp", "--help"})
+	err := app.Run(ctx, []string{"gw", "--help"})
 
 	assert.NoError(t, err)
 	output := buf.String()
 
 	// Check help output contains expected information
-	assert.Contains(t, output, "wtp")
+	assert.Contains(t, output, "gw")
 	assert.Contains(t, output, "Enhanced Git worktree management")
 
 	// Check that all expected commands are present in the output
@@ -100,7 +100,7 @@ func TestAppRun_NoArgs(t *testing.T) {
 	app.Writer = &buf
 
 	ctx := context.Background()
-	err := app.Run(ctx, []string{"wtp"})
+	err := app.Run(ctx, []string{"gw"})
 
 	// Should show help when no arguments
 	assert.NoError(t, err)
@@ -112,7 +112,7 @@ func TestMainExitCode(_ *testing.T) {
 	// Test that main exits with non-zero on error
 	if os.Getenv("BE_CRASHER") == "1" {
 		// This will cause an error
-		os.Args = []string{"wtp", "invalid-command"}
+		os.Args = []string{"gw", "invalid-command"}
 		main()
 		return
 	}
@@ -124,9 +124,9 @@ func TestMainExitCode(_ *testing.T) {
 // Helper function to create the app for testing
 func createApp() *cli.Command {
 	return &cli.Command{
-		Name:  "wtp",
+		Name:  "gw",
 		Usage: "Enhanced Git worktree management",
-		Description: "wtp (Worktree Plus) simplifies Git worktree creation with automatic branch tracking, " +
+		Description: "gw (Worktree Plus) simplifies Git worktree creation with automatic branch tracking, " +
 			"project-specific setup hooks, and convenient defaults.",
 		Version:                         version,
 		EnableShellCompletion:           true,

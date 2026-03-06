@@ -44,7 +44,7 @@ func TestInitCommand_NotInGitRepo(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	err = app.Run(ctx, []string{"wtp", "init"})
+	err = app.Run(ctx, []string{"gw", "init"})
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "not in a git repository")
@@ -79,7 +79,7 @@ func TestInitCommand_ConfigAlreadyExists(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	err = app.Run(ctx, []string{"wtp", "init"})
+	err = app.Run(ctx, []string{"gw", "init"})
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "already exists")
@@ -112,7 +112,7 @@ func TestInitCommand_Success(t *testing.T) {
 	app.Writer = &buf
 
 	ctx := context.Background()
-	err = app.Run(ctx, []string{"wtp", "init"})
+	err = app.Run(ctx, []string{"gw", "init"})
 	assert.NoError(t, err)
 
 	// Check output
@@ -147,11 +147,11 @@ func TestInitCommand_Success(t *testing.T) {
 	assert.Contains(t, contentStr, "from: .env")
 	assert.Contains(t, contentStr, "to: .env")
 	assert.Contains(t, contentStr, "type: command")
-	assert.Contains(t, contentStr, "command: wtp")
-	assert.Contains(t, contentStr, `command: wtp list`)
+	assert.Contains(t, contentStr, "command: gw")
+	assert.Contains(t, contentStr, `command: gw list`)
 
 	// Check for comments
-	assert.Contains(t, contentStr, "# Worktree Plus Configuration")
+	assert.Contains(t, contentStr, "# gw Configuration")
 	assert.Contains(t, contentStr, "# Default settings for worktrees")
 	assert.Contains(t, contentStr, "# Hooks that run after creating a worktree")
 }

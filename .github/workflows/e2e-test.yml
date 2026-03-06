@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: go mod download
       
-      - name: Build wtp
+      - name: Build gw
         run: go tool task build
       
       - name: Run unit tests
@@ -37,7 +37,7 @@ jobs:
       - name: Run E2E tests
         run: go tool task test-e2e
         env:
-          WTP_E2E_BINARY: ./wtp
+          GW_E2E_BINARY: ./gw
       
       - name: Upload test results
         if: always()

@@ -12,9 +12,9 @@ import (
 
 func TestNormalizeCompletionArgs(t *testing.T) {
 	t.Run("keeps trailing sentinel untouched", func(t *testing.T) {
-		args := []string{"wtp", "remove", "target", "--", "--generate-shell-completion"}
+		args := []string{"gw", "remove", "target", "--", "--generate-shell-completion"}
 		got := normalizeCompletionArgs(args)
-		want := []string{"wtp", "remove", "target", "--", "--generate-shell-completion"}
+		want := []string{"gw", "remove", "target", "--", "--generate-shell-completion"}
 
 		if !reflect.DeepEqual(got, want) {
 			t.Fatalf("normalizeCompletionArgs() = %v, want %v", got, want)
@@ -22,10 +22,10 @@ func TestNormalizeCompletionArgs(t *testing.T) {
 	})
 
 	t.Run("converts trailing sentinel in completion context", func(t *testing.T) {
-		t.Setenv("COMP_LINE", "wtp remove target --")
-		args := []string{"wtp", "remove", "target", "--", "--generate-shell-completion"}
+		t.Setenv("COMP_LINE", "gw remove target --")
+		args := []string{"gw", "remove", "target", "--", "--generate-shell-completion"}
 		got := normalizeCompletionArgs(args)
-		want := []string{"wtp", "remove", "target", "-", "--generate-shell-completion"}
+		want := []string{"gw", "remove", "target", "-", "--generate-shell-completion"}
 
 		if !reflect.DeepEqual(got, want) {
 			t.Fatalf("normalizeCompletionArgs() = %v, want %v", got, want)
@@ -33,9 +33,9 @@ func TestNormalizeCompletionArgs(t *testing.T) {
 	})
 
 	t.Run("keeps completion flag before positional arguments", func(t *testing.T) {
-		args := []string{"wtp", "remove", "--generate-shell-completion", "target"}
+		args := []string{"gw", "remove", "--generate-shell-completion", "target"}
 		got := normalizeCompletionArgs(args)
-		want := []string{"wtp", "remove", "--generate-shell-completion", "target"}
+		want := []string{"gw", "remove", "--generate-shell-completion", "target"}
 
 		if !reflect.DeepEqual(got, want) {
 			t.Fatalf("normalizeCompletionArgs() = %v, want %v", got, want)
@@ -43,7 +43,7 @@ func TestNormalizeCompletionArgs(t *testing.T) {
 	})
 
 	t.Run("keeps arguments untouched when no normalization is needed", func(t *testing.T) {
-		args := []string{"wtp", "remove", "target", "--generate-shell-completion"}
+		args := []string{"gw", "remove", "target", "--generate-shell-completion"}
 		got := normalizeCompletionArgs(args)
 
 		if !reflect.DeepEqual(got, args) {
@@ -53,17 +53,17 @@ func TestNormalizeCompletionArgs(t *testing.T) {
 }
 
 func TestPatchCompletionScriptFishUsesDynamicHelper(t *testing.T) {
-	original := `# wtp fish shell completion
-complete -c wtp -a 'add'
+	original := `# gw fish shell completion
+complete -c gw -a 'add'
 `
 
 	result := patchCompletionScript("fish", original)
 
-	if !strings.Contains(result, "function __fish_wtp_dynamic_complete") {
+	if !strings.Contains(result, "function __fish_gw_dynamic_complete") {
 		t.Fatalf("expected dynamic helper function in fish script, got:\n%s", result)
 	}
 
-	if !strings.Contains(result, "complete -c wtp -f -a '(__fish_wtp_dynamic_complete)'") {
+	if !strings.Contains(result, "complete -c gw -f -a '(__fish_gw_dynamic_complete)'") {
 		t.Fatalf("expected completion registration to use dynamic helper, got:\n%s", result)
 	}
 
@@ -71,23 +71,23 @@ complete -c wtp -a 'add'
 		t.Fatalf("expected fish script to strip description suffixes, got:\n%s", result)
 	}
 
-	if strings.Contains(result, "__fish_wtp_no_subcommand") {
+	if strings.Contains(result, "__fish_gw_no_subcommand") {
 		t.Fatalf("expected legacy static completion helpers to be removed, got:\n%s", result)
 	}
 }
 
 func TestPatchCompletionScriptBashSanitizesDescriptions(t *testing.T) {
-	const originalBashAutocomplete = "#!/bin/bash\n\n__wtp_bash_autocomplete() {\n" +
+	const originalBashAutocomplete = "#!/bin/bash\n\n__gw_bash_autocomplete() {\n" +
 		"    opts=$(eval \"${requestComp}\" 2>/dev/null)\n" +
 		"    COMPREPLY=($(compgen -W \"${opts}\" -- ${cur}))\n}\n"
 
 	result := patchCompletionScript("bash", originalBashAutocomplete)
 
-	if !strings.Contains(result, "_wtp_sanitize_completion_list") {
+	if !strings.Contains(result, "_gw_sanitize_completion_list") {
 		t.Fatalf("expected sanitize helper to be injected, got:\n%s", result)
 	}
 
-	if !strings.Contains(result, "opts=$(_wtp_sanitize_completion_list <<<\"${opts}\")") {
+	if !strings.Contains(result, "opts=$(_gw_sanitize_completion_list <<<\"${opts}\")") {
 		t.Fatalf("expected bash script to sanitize completion output, got:\n%s", result)
 	}
 }
@@ -133,8 +133,8 @@ func TestPatchCompletionScriptZshInjectsCompletionEnv(t *testing.T) {
 	const (
 		currentLine = `opts=("${(@f)$(${words[@]:0:#words[@]-1} ${current} --generate-shell-completion)}")`
 		subCmdLine  = `opts=("${(@f)$(${words[@]:0:#words[@]-1} --generate-shell-completion)}")`
-		original    = "\n_wtp() {\n" + currentLine + "\n" + subCmdLine + "\n}\n"
-		envMarker   = "env WTP_SHELL_COMPLETION=1"
+		original    = "\n_gw() {\n" + currentLine + "\n" + subCmdLine + "\n}\n"
+		envMarker   = "env GW_SHELL_COMPLETION=1"
 	)
 
 	patched := patchCompletionScript("zsh", original)
@@ -175,14 +175,14 @@ func generateCompletionScript(t *testing.T, shell string) string {
 		os.Stderr = oldStderr
 	}()
 
-	args := normalizeCompletionArgs([]string{"wtp", "completion", shell})
+	args := normalizeCompletionArgs([]string{"gw", "completion", shell})
 	runErr := app.Run(context.Background(), args)
 	if closeErr := w.Close(); closeErr != nil {
 		t.Fatalf("failed to close writer: %v", closeErr)
 	}
 
 	if runErr != nil {
-		t.Fatalf("wtp completion %s failed: %v", shell, runErr)
+		t.Fatalf("gw completion %s failed: %v", shell, runErr)
 	}
 
 	data, err := io.ReadAll(r)
