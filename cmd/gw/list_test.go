@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v3"
 
-	"github.com/satococoa/wtp/v2/internal/command"
-	"github.com/satococoa/wtp/v2/internal/config"
+	"github.com/jeanduplessis/gw/internal/command"
+	"github.com/jeanduplessis/gw/internal/config"
 )
 
 func defaultListDisplayOptionsForTests() listDisplayOptions {

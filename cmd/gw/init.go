@@ -8,9 +8,9 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"github.com/satococoa/wtp/v2/internal/config"
-	"github.com/satococoa/wtp/v2/internal/errors"
-	"github.com/satococoa/wtp/v2/internal/git"
+	"github.com/jeanduplessis/gw/internal/config"
+	"github.com/jeanduplessis/gw/internal/errors"
+	"github.com/jeanduplessis/gw/internal/git"
 )
 
 const configFileMode = 0o600

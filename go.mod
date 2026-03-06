@@ -1,4 +1,4 @@
-module github.com/satococoa/wtp/v2
+module github.com/jeanduplessis/gw
 
 go 1.24.4
 

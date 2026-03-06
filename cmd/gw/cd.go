@@ -12,10 +12,10 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"github.com/satococoa/wtp/v2/internal/command"
-	"github.com/satococoa/wtp/v2/internal/config"
-	"github.com/satococoa/wtp/v2/internal/errors"
-	"github.com/satococoa/wtp/v2/internal/git"
+	"github.com/jeanduplessis/gw/internal/command"
+	"github.com/jeanduplessis/gw/internal/config"
+	"github.com/jeanduplessis/gw/internal/errors"
+	"github.com/jeanduplessis/gw/internal/git"
 )
 
 // isWorktreeManagedCd determines if a worktree is managed by gw (for cd command)

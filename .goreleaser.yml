@@ -71,16 +71,16 @@ changelog:
 brews:
   - name: gw
     repository:
-      owner: satococoa
+      owner: jeanduplessis
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    url_template: "https://github.com/satococoa/wtp/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+    url_template: "https://github.com/jeanduplessis/gw/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     download_strategy: CurlDownloadStrategy
     commit_author:
       name: goreleaserbot
       email: bot@goreleaser.com
     commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
-    homepage: "https://github.com/satococoa/wtp"
+    homepage: "https://github.com/jeanduplessis/gw"
     description: "gw - Git worktree management with automated setup and hooks"
     license: "MIT"
     skip_upload: auto
@@ -170,8 +170,8 @@ brews:
 
 release:
   github:
-    owner: satococoa
-    name: wtp
+    owner: jeanduplessis
+    name: homebrew-tap
   draft: false
   prerelease: auto
   name_template: "{{.ProjectName}} {{.Version}}"
@@ -185,13 +185,13 @@ release:
 
     ### Homebrew
     ```bash
-    brew install satococoa/tap/gw
+    brew install jeanduplessis/homebrew-tap/gw
     ```
 
     ### Manual Installation
     Download the appropriate binary for your platform from the assets below.
 
-    **Full Changelog**: https://github.com/satococoa/wtp/compare/{{.PreviousTag}}...{{.Tag}}
+    **Full Changelog**: https://github.com/jeanduplessis/gw/compare/{{.PreviousTag}}...{{.Tag}}
 
 nfpms:
   - id: gw
@@ -203,9 +203,9 @@ nfpms:
       {{- if eq .Arch "amd64" }}x86_64
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
-    vendor: satococoa
-    homepage: https://github.com/satococoa/wtp
-    maintainer: satococoa <satococoa@example.com>
+    vendor: jeanduplessis
+    homepage: https://github.com/jeanduplessis/gw
+    maintainer: Jean du Plessis
     description: |-
       gw - Git worktree management with automated setup and hooks.
     license: MIT

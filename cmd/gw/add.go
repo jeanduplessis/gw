@@ -14,12 +14,12 @@ import (
 
 	"github.com/urfave/cli/v3"
 
-	"github.com/satococoa/wtp/v2/internal/command"
-	"github.com/satococoa/wtp/v2/internal/config"
-	"github.com/satococoa/wtp/v2/internal/errors"
-	"github.com/satococoa/wtp/v2/internal/git"
-	"github.com/satococoa/wtp/v2/internal/hooks"
-	wtpio "github.com/satococoa/wtp/v2/internal/io"
+	"github.com/jeanduplessis/gw/internal/command"
+	"github.com/jeanduplessis/gw/internal/config"
+	"github.com/jeanduplessis/gw/internal/errors"
+	"github.com/jeanduplessis/gw/internal/git"
+	"github.com/jeanduplessis/gw/internal/hooks"
+	wtpio "github.com/jeanduplessis/gw/internal/io"
 )
 
 // NewAddCommand creates the add command definition

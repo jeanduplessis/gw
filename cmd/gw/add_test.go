@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 
-	"github.com/satococoa/wtp/v2/internal/command"
-	"github.com/satococoa/wtp/v2/internal/config"
-	"github.com/satococoa/wtp/v2/internal/errors"
+	"github.com/jeanduplessis/gw/internal/command"
+	"github.com/jeanduplessis/gw/internal/config"
+	"github.com/jeanduplessis/gw/internal/errors"
 )
 
 // ===== Command Structure Tests =====
