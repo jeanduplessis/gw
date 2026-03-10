@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/urfave/cli/v3"
 
@@ -43,10 +46,30 @@ func initCommand(_ context.Context, cmd *cli.Command) error {
 		return errors.NotInGitRepository()
 	}
 
+	// Get the writer from cli.Command
+	w := cmd.Root().Writer
+	if w == nil {
+		w = os.Stdout
+	}
+
+	r := cmd.Root().Reader
+	if r == nil {
+		r = os.Stdin
+	}
+
 	// Check if config file already exists
 	configPath := fmt.Sprintf("%s/%s", repo.Path(), config.ConfigFileName)
 	if _, statErr := os.Stat(configPath); statErr == nil {
-		return errors.ConfigAlreadyExists(configPath)
+		// Config exists — ask user whether to overwrite or skip
+		if !promptConfigOverwrite(w, r, configPath) {
+			if _, printErr := fmt.Fprintln(w,
+				"Skipping config creation — existing .gw.yml preserved."); printErr != nil {
+				return printErr
+			}
+			// Proceed to shell setup
+			_, _ = promptShellSetup(w, r)
+			return nil
+		}
 	}
 
 	repoInfo, repoStatErr := os.Stat(repo.Path())
@@ -115,17 +138,39 @@ hooks:
 		return errors.DirectoryAccessFailed("create configuration file", configPath, err)
 	}
 
-	// Get the writer from cli.Command
-	w := cmd.Root().Writer
-	if w == nil {
-		w = os.Stdout
-	}
-
 	if _, printErr := fmt.Fprintf(w, "Configuration file created: %s\n", configPath); printErr != nil {
 		return printErr
 	}
-	_, printLnErr := fmt.Fprintln(w, "Edit this file to customize your worktree setup.")
-	return printLnErr
+	if _, printErr := fmt.Fprintln(w, "Edit this file to customize your worktree setup."); printErr != nil {
+		return printErr
+	}
+
+	// Offer to set up shell integration
+	_, _ = promptShellSetup(w, r)
+
+	return nil
+}
+
+// promptConfigOverwrite asks the user whether to overwrite an existing config file.
+// Returns true if the user wants to overwrite, false otherwise.
+// In non-TTY mode, returns false (skip overwrite) without prompting.
+func promptConfigOverwrite(w io.Writer, r io.Reader, configPath string) bool {
+	if !isTerminalFunc() {
+		return false
+	}
+
+	prompt := fmt.Sprintf("Overwrite existing %s? [y/N] ", configPath)
+	if _, printErr := fmt.Fprint(w, prompt); printErr != nil {
+		return false
+	}
+
+	scanner := bufio.NewScanner(r)
+	if !scanner.Scan() {
+		return false
+	}
+
+	answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
+	return answer == "y" || answer == "yes"
 }
 
 func ensureWritableDirectory(path string) error {

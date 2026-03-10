@@ -50,7 +50,75 @@ func TestInitCommand_NotInGitRepo(t *testing.T) {
 	assert.Contains(t, err.Error(), "not in a git repository")
 }
 
-func TestInitCommand_ConfigAlreadyExists(t *testing.T) {
+func TestInitCommand_ConfigAlreadyExists_NonTTY_SkipsConfig(t *testing.T) {
+	// Save originals
+	originalIsTerminal := isTerminalFunc
+	originalGetShell := getShellFunc
+	defer func() {
+		isTerminalFunc = originalIsTerminal
+		getShellFunc = originalGetShell
+	}()
+
+	isTerminalFunc = func() bool { return false }
+	getShellFunc = func() string { return "" }
+
+	// Create a temporary directory
+	tempDir := t.TempDir()
+
+	oldDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(oldDir) }()
+	err := os.Chdir(tempDir)
+	assert.NoError(t, err)
+
+	// Initialize as a git repository
+	gitCmd := exec.Command("git", "init")
+	gitCmd.Dir = tempDir
+	err = gitCmd.Run()
+	if err != nil {
+		t.Skip("git not available")
+	}
+
+	// Create existing config file with known content
+	configPath := filepath.Join(tempDir, config.ConfigFileName)
+	err = os.WriteFile(configPath, []byte("existing config"), 0644)
+	assert.NoError(t, err)
+
+	app := &cli.Command{
+		Commands: []*cli.Command{
+			NewInitCommand(),
+		},
+	}
+
+	var buf bytes.Buffer
+	app.Writer = &buf
+
+	ctx := context.Background()
+	err = app.Run(ctx, []string{"gw", "init"})
+
+	// Should NOT error — it skips config creation in non-TTY mode
+	assert.NoError(t, err)
+
+	output := buf.String()
+	assert.Contains(t, output, "existing .gw.yml preserved")
+
+	// Original file should be unchanged
+	content, readErr := os.ReadFile(configPath)
+	assert.NoError(t, readErr)
+	assert.Equal(t, "existing config", string(content))
+}
+
+func TestInitCommand_ConfigAlreadyExists_TTY_UserDeclinesOverwrite(t *testing.T) {
+	// Save originals
+	originalIsTerminal := isTerminalFunc
+	originalGetShell := getShellFunc
+	defer func() {
+		isTerminalFunc = originalIsTerminal
+		getShellFunc = originalGetShell
+	}()
+
+	isTerminalFunc = func() bool { return true }
+	getShellFunc = func() string { return "" }
+
 	// Create a temporary directory
 	tempDir := t.TempDir()
 
@@ -78,11 +146,139 @@ func TestInitCommand_ConfigAlreadyExists(t *testing.T) {
 		},
 	}
 
+	var buf bytes.Buffer
+	app.Writer = &buf
+	app.Reader = strings.NewReader("n\n")
+
 	ctx := context.Background()
 	err = app.Run(ctx, []string{"gw", "init"})
 
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "already exists")
+	assert.NoError(t, err)
+
+	output := buf.String()
+	assert.Contains(t, output, "Overwrite")
+	assert.Contains(t, output, "existing .gw.yml preserved")
+
+	// Original file should be unchanged
+	content, readErr := os.ReadFile(configPath)
+	assert.NoError(t, readErr)
+	assert.Equal(t, "existing config", string(content))
+}
+
+func TestInitCommand_ConfigAlreadyExists_TTY_UserAcceptsOverwrite(t *testing.T) {
+	// Save originals
+	originalIsTerminal := isTerminalFunc
+	originalGetShell := getShellFunc
+	defer func() {
+		isTerminalFunc = originalIsTerminal
+		getShellFunc = originalGetShell
+	}()
+
+	isTerminalFunc = func() bool { return true }
+	getShellFunc = func() string { return "" }
+
+	// Create a temporary directory
+	tempDir := t.TempDir()
+
+	oldDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(oldDir) }()
+	err := os.Chdir(tempDir)
+	assert.NoError(t, err)
+
+	// Initialize as a git repository
+	gitCmd := exec.Command("git", "init")
+	gitCmd.Dir = tempDir
+	err = gitCmd.Run()
+	if err != nil {
+		t.Skip("git not available")
+	}
+
+	// Create existing config file with old content
+	configPath := filepath.Join(tempDir, config.ConfigFileName)
+	err = os.WriteFile(configPath, []byte("existing config"), 0644)
+	assert.NoError(t, err)
+
+	app := &cli.Command{
+		Commands: []*cli.Command{
+			NewInitCommand(),
+		},
+	}
+
+	var buf bytes.Buffer
+	app.Writer = &buf
+	app.Reader = strings.NewReader("y\n")
+
+	ctx := context.Background()
+	err = app.Run(ctx, []string{"gw", "init"})
+
+	assert.NoError(t, err)
+
+	output := buf.String()
+	assert.Contains(t, output, "Overwrite")
+	assert.Contains(t, output, "Configuration file created:")
+
+	// File should be overwritten with new config
+	content, readErr := os.ReadFile(configPath)
+	assert.NoError(t, readErr)
+	assert.Contains(t, string(content), `version: "1.0"`)
+	assert.NotEqual(t, "existing config", string(content))
+}
+
+func TestInitCommand_ConfigAlreadyExists_TTY_EmptyInputDeclinesOverwrite(t *testing.T) {
+	// Save originals
+	originalIsTerminal := isTerminalFunc
+	originalGetShell := getShellFunc
+	defer func() {
+		isTerminalFunc = originalIsTerminal
+		getShellFunc = originalGetShell
+	}()
+
+	isTerminalFunc = func() bool { return true }
+	getShellFunc = func() string { return "" }
+
+	// Create a temporary directory
+	tempDir := t.TempDir()
+
+	oldDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(oldDir) }()
+	err := os.Chdir(tempDir)
+	assert.NoError(t, err)
+
+	// Initialize as a git repository
+	gitCmd := exec.Command("git", "init")
+	gitCmd.Dir = tempDir
+	err = gitCmd.Run()
+	if err != nil {
+		t.Skip("git not available")
+	}
+
+	// Create existing config file
+	configPath := filepath.Join(tempDir, config.ConfigFileName)
+	err = os.WriteFile(configPath, []byte("existing config"), 0644)
+	assert.NoError(t, err)
+
+	app := &cli.Command{
+		Commands: []*cli.Command{
+			NewInitCommand(),
+		},
+	}
+
+	var buf bytes.Buffer
+	app.Writer = &buf
+	app.Reader = strings.NewReader("\n")
+
+	ctx := context.Background()
+	err = app.Run(ctx, []string{"gw", "init"})
+
+	assert.NoError(t, err)
+
+	output := buf.String()
+	assert.Contains(t, output, "existing .gw.yml preserved")
+
+	// File unchanged
+	content, readErr := os.ReadFile(configPath)
+	assert.NoError(t, readErr)
+	assert.Equal(t, "existing config", string(content))
 }
 
 func TestInitCommand_Success(t *testing.T) {
@@ -172,6 +368,60 @@ func TestInitCommand_DirectoryAccessError(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to access")
+}
+
+func TestInitCommand_IncludesShellSetupPrompt(t *testing.T) {
+	// Save all mockable functions
+	originalGetShell := getShellFunc
+	originalIsTerminal := isTerminalFunc
+	originalGetHome := getUserHomeDir
+	originalReadFile := readFileFunc
+	defer func() {
+		getShellFunc = originalGetShell
+		isTerminalFunc = originalIsTerminal
+		getUserHomeDir = originalGetHome
+		readFileFunc = originalReadFile
+	}()
+
+	// Configure mocks: detected shell, not a TTY, no existing integration
+	getShellFunc = func() string { return "zsh" }
+	isTerminalFunc = func() bool { return false }
+	getUserHomeDir = func() (string, error) { return "/home/test", nil }
+	readFileFunc = func(_ string) ([]byte, error) { return nil, os.ErrNotExist }
+
+	// Create a temporary directory
+	tempDir := t.TempDir()
+
+	oldDir, _ := os.Getwd()
+	defer func() { _ = os.Chdir(oldDir) }()
+	err := os.Chdir(tempDir)
+	assert.NoError(t, err)
+
+	// Initialize as a git repository
+	gitCmd := exec.Command("git", "init")
+	gitCmd.Dir = tempDir
+	err = gitCmd.Run()
+	if err != nil {
+		t.Skip("git not available")
+	}
+
+	app := &cli.Command{
+		Commands: []*cli.Command{
+			NewInitCommand(),
+		},
+	}
+
+	var buf bytes.Buffer
+	app.Writer = &buf
+
+	ctx := context.Background()
+	err = app.Run(ctx, []string{"gw", "init"})
+	assert.NoError(t, err)
+
+	output := buf.String()
+	// Should contain both the config creation message and shell integration info
+	assert.Contains(t, output, "Configuration file created:")
+	assert.Contains(t, output, "gw shell-init zsh")
 }
 
 func TestInitCommand_WriteFileError(t *testing.T) {

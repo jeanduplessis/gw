@@ -27,31 +27,14 @@ func TestErrorMessages(t *testing.T) {
 			"Should provide helpful suggestions for git repository error")
 	})
 
-	t.Run("BranchNotFound", func(t *testing.T) {
+	t.Run("BranchNotFoundAutoCreates", func(t *testing.T) {
 		repo := env.CreateTestRepo("error-branch-not-found")
 
+		// When a branch doesn't exist locally or remotely, gw add auto-creates it
 		output, err := repo.RunWTP("add", "nonexistent-branch")
-		framework.AssertError(t, err)
-		framework.AssertOutputContains(t, output, "not found in local or remote branches")
-		framework.AssertHelpfulError(t, output)
-
-		// Check for specific suggestions
-		suggestions := []string{
-			"Check the branch name spelling",
-			"git branch -a",
-			"Create a new branch",
-			"-b",
-			"git fetch",
-		}
-
-		foundSuggestion := false
-		for _, suggestion := range suggestions {
-			if strings.Contains(output, suggestion) {
-				foundSuggestion = true
-				break
-			}
-		}
-		framework.AssertTrue(t, foundSuggestion, "Should provide helpful suggestions for branch not found")
+		framework.AssertNoError(t, err)
+		framework.AssertWorktreeCreated(t, output, "nonexistent-branch")
+		framework.AssertWorktreeExists(t, repo, "nonexistent-branch")
 	})
 
 	t.Run("WorktreeAlreadyExists", func(t *testing.T) {

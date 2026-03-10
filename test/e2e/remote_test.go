@@ -64,14 +64,15 @@ func TestRemoteBranchHandling(t *testing.T) {
 		_ = branchOutput // Branch tracking verification would go here
 	})
 
-	t.Run("NonExistentRemoteBranch", func(t *testing.T) {
+	t.Run("NonExistentRemoteBranchAutoCreates", func(t *testing.T) {
 		repo := env.CreateTestRepo("remote-nonexistent")
 		repo.AddRemote("origin", "https://example.com/repo.git")
 
+		// Branch doesn't exist locally or remotely — should auto-create
 		output, err := repo.RunWTP("add", "nonexistent-remote-branch")
-		framework.AssertError(t, err)
-		framework.AssertOutputContains(t, output, "not found in local or remote branches")
-		framework.AssertHelpfulError(t, output)
+		framework.AssertNoError(t, err)
+		framework.AssertWorktreeCreated(t, output, "nonexistent-remote-branch")
+		framework.AssertWorktreeExists(t, repo, "nonexistent-remote-branch")
 	})
 
 	t.Run("LocalTakesPrecedence", func(t *testing.T) {
@@ -105,12 +106,13 @@ func TestRemoteConfiguration(t *testing.T) {
 	env := framework.NewTestEnvironment(t)
 	defer env.Cleanup()
 
-	t.Run("NoRemotes", func(t *testing.T) {
+	t.Run("NoRemotesAutoCreates", func(t *testing.T) {
 		repo := env.CreateTestRepo("no-remotes")
 
+		// No remotes and branch doesn't exist locally — should auto-create
 		output, err := repo.RunWTP("add", "remote-branch")
-		framework.AssertError(t, err)
-		framework.AssertOutputContains(t, output, "not found in local or remote branches")
+		framework.AssertNoError(t, err)
+		framework.AssertWorktreeCreated(t, output, "remote-branch")
 	})
 
 	t.Run("InvalidRemoteURL", func(t *testing.T) {
@@ -133,15 +135,16 @@ func TestRemoteConfiguration(t *testing.T) {
 		repo.AddRemote("origin", "https://example.com/repo.git")
 		repo.CreateRemoteBranch("origin", "Feature/CaseSensitive")
 
-		// Try with different case
-		output, err := repo.RunWTP("add", "feature/casesensitive")
-		framework.AssertError(t, err)
-		framework.AssertOutputContains(t, output, "not found")
-
-		// Try with correct case
-		output, err = repo.RunWTP("add", "Feature/CaseSensitive")
+		// Try with correct case — should track remote branch
+		output, err := repo.RunWTP("add", "Feature/CaseSensitive")
 		framework.AssertNoError(t, err)
 		framework.AssertWorktreeCreated(t, output, "Feature/CaseSensitive")
+
+		// Try with different case — should auto-create as a new branch
+		// Use a distinct name to avoid path collision on case-insensitive filesystems
+		output, err = repo.RunWTP("add", "feature/case-different")
+		framework.AssertNoError(t, err)
+		framework.AssertWorktreeCreated(t, output, "feature/case-different")
 	})
 }
 

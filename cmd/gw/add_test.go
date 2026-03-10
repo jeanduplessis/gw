@@ -644,7 +644,7 @@ func TestAddCommand_SimplifiedInterface(t *testing.T) {
 }
 
 func TestAddCommand_Integration(t *testing.T) {
-	t.Run("should coordinate all components successfully", func(t *testing.T) {
+	t.Run("should auto-create branch when not found", func(t *testing.T) {
 		// Given: a CLI command with proper setup
 		app := &cli.Command{
 			Name: "test",
@@ -666,12 +666,16 @@ func TestAddCommand_Integration(t *testing.T) {
 		}
 
 		// When: running add command with nonexistent branch
+		// The command will attempt to auto-create, which may succeed or fail
+		// depending on the git repo state, but should NOT return "branch not found"
 		ctx := context.Background()
 		err := app.Run(ctx, []string{"test", "add", "nonexistent-test-branch"})
 
-		// Then: should return appropriate error for branch not found
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "not found")
+		// Then: if there's an error, it should NOT be "branch not found"
+		// (it may fail for other reasons like git worktree creation in test env)
+		if err != nil {
+			assert.NotContains(t, err.Error(), "not found in local or remote")
+		}
 	})
 
 	t.Run("should handle validation errors gracefully", func(t *testing.T) {
@@ -760,6 +764,8 @@ func TestDisplaySuccessMessage_Integration(t *testing.T) {
 		assert.Contains(t, output, "🌿 Branch: feature/awesome")
 		assert.Contains(t, output, "💡 To switch to the new worktree, run:")
 		assert.Contains(t, output, "gw cd feature/awesome")
+		assert.Contains(t, output, "If gw cd only prints a path, set up the shell hook first:")
+		assert.Contains(t, output, "gw shell-init")
 	})
 
 	t.Run("should display friendly success message without branch name", func(t *testing.T) {

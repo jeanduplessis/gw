@@ -58,16 +58,29 @@ func TestInitCommand(t *testing.T) {
 		framework.AssertTrue(t, strings.Contains(content, "base_dir:"), "Config should contain base_dir")
 	})
 
-	t.Run("ConfigAlreadyExists", func(t *testing.T) {
+	t.Run("ConfigAlreadyExists_SkipsInNonTTY", func(t *testing.T) {
 		repo := env.CreateTestRepo("init-exists-test")
 
 		_, err := repo.RunWTP("init")
 		framework.AssertNoError(t, err)
 
+		// Second init in non-TTY mode should succeed (skip config creation)
 		output, err := repo.RunWTP("init")
-		framework.AssertError(t, err)
-		framework.AssertOutputContains(t, output, "already exists")
-		framework.AssertHelpfulError(t, output)
+		framework.AssertNoError(t, err)
+		framework.AssertOutputContains(t, output, "existing .gw.yml preserved")
+	})
+
+	t.Run("InitShowsShellIntegrationInfo", func(t *testing.T) {
+		repo := env.CreateTestRepo("init-shell-test")
+
+		output, err := repo.RunWTP("init")
+		framework.AssertNoError(t, err)
+		framework.AssertOutputContains(t, output, "Configuration file created")
+		// Non-interactive (E2E runs are not TTY), so should show shell integration instructions
+		framework.AssertTrue(t,
+			strings.Contains(output, "shell-init") ||
+				strings.Contains(output, "shell integration"),
+			"Init output should mention shell integration setup")
 	})
 
 	t.Run("InitOutsideRepo", func(t *testing.T) {

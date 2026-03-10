@@ -27,13 +27,13 @@ func NewAddCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "add",
 		Usage:     "Create a new worktree",
-		UsageText: "gw add <existing-branch>\n       gw add -b <new-branch> [<commit>]",
-		Description: "Creates a new worktree for the specified branch. If the branch doesn't exist locally " +
-			"but exists on a remote, it will be automatically tracked.\n\n" +
+		UsageText: "gw add <branch>\n       gw add -b <new-branch> [<start-point>]",
+		Description: "Creates a new worktree for the specified branch. If the branch exists locally " +
+			"or on a remote, it will be checked out. If the branch doesn't exist anywhere, " +
+			"it will be created automatically.\n\n" +
 			"Examples:\n" +
-			"  gw add feature/auth                    # Create worktree from existing branch\n" +
-			"  gw add -b new-feature                  # Create new branch and worktree\n" +
-			"  gw add -b hotfix/urgent main           # Create new branch from main commit",
+			"  gw add feature/auth                    # Existing branch or creates new one\n" +
+			"  gw add -b hotfix/urgent main           # Create new branch from specific start point",
 		ShellComplete: completeBranches,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -84,13 +84,13 @@ func addCommandWithCommandExecutor(
 	workTreePath, branchName := resolveWorktreePath(cfg, mainRepoPath, firstArg, cmd)
 
 	// Resolve branch if needed
-	resolvedTrack, err := resolveBranchTracking(cmd, branchName, mainRepoPath)
+	resolvedTrack, branchNotFound, err := resolveBranchTracking(cmd, branchName, mainRepoPath)
 	if err != nil {
 		return err
 	}
 
 	// Build git worktree command using the new command builder
-	worktreeCmd := buildWorktreeCommand(cmd, workTreePath, branchName, resolvedTrack)
+	worktreeCmd := buildWorktreeCommand(cmd, workTreePath, branchName, resolvedTrack, branchNotFound)
 
 	// Execute the command
 	result, err := cmdExec.Execute([]command.Command{worktreeCmd})
@@ -120,12 +120,18 @@ func addCommandWithCommandExecutor(
 	return nil
 }
 
-// buildWorktreeCommand builds a git worktree command using the new command package
+// buildWorktreeCommand builds a git worktree command using the new command package.
+// When autoCreate is true, the branch doesn't exist and will be created with -b.
 func buildWorktreeCommand(
-	cmd *cli.Command, workTreePath, _, resolvedTrack string,
+	cmd *cli.Command, workTreePath, branchName, resolvedTrack string, autoCreate bool,
 ) command.Command {
 	opts := command.GitWorktreeAddOptions{
 		Branch: cmd.String("branch"),
+	}
+
+	// Auto-create: branch not found locally or remotely, so create it
+	if autoCreate && opts.Branch == "" {
+		opts.Branch = branchName
 	}
 
 	// Use resolved track if provided
@@ -144,6 +150,8 @@ func buildWorktreeCommand(
 			// The first argument is the branch name when using resolved tracking without -b
 			opts.Branch = cmd.Args().Get(0)
 		}
+	} else if autoCreate {
+		// Auto-create: no commitish needed, git will branch from HEAD
 	} else if cmd.Args().Len() > 0 {
 		// Normal case: first argument is the branch/commitish
 		commitish = cmd.Args().Get(0)
@@ -352,7 +360,7 @@ func executePostCreateHooks(w io.Writer, cfg *config.Config, repoPath, workTreeP
 
 func validateAddInput(cmd *cli.Command) error {
 	if cmd.Args().Len() == 0 && cmd.String("branch") == "" {
-		return errors.BranchNameRequired("gw add <existing-branch> | -b <new-branch> [<commit>]")
+		return errors.BranchNameRequired("gw add <branch> | -b <new-branch> [<start-point>]")
 	}
 
 	return nil
@@ -503,7 +511,26 @@ func displaySuccessMessageWithCommitish(
 		return err
 	}
 
+	if _, err := fmt.Fprintln(w); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintln(w, "   If gw cd only prints a path, set up the shell hook first:"); err != nil {
+		return err
+	}
+	if _, err := fmt.Fprintf(w, "   eval \"$(gw shell-init %s)\"\n", detectShellOrDefault()); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+// detectShellOrDefault returns the user's shell name, falling back to "<shell>" as a placeholder.
+func detectShellOrDefault() string {
+	shell := getShellFunc()
+	if shell == "" {
+		return "<shell>"
+	}
+	return shell
 }
 
 // isMainWorktree checks if the given path is the main worktree
@@ -542,18 +569,19 @@ func resolveWorktreePath(
 	return workTreePath, branchName
 }
 
-// resolveBranchTracking handles branch resolution and tracking setup
+// resolveBranchTracking handles branch resolution and tracking setup.
+// When branchNotFound is true, the caller should auto-create the branch.
 func resolveBranchTracking(
 	cmd *cli.Command, branchName string, mainRepoPath string,
-) (string, error) {
+) (trackRef string, branchNotFound bool, err error) {
 	// Only auto-resolve branch when not creating a new branch and branch name exists
 	if cmd.String("branch") != "" || branchName == "" {
-		return "", nil
+		return "", false, nil
 	}
 
 	repo, err := git.NewRepository(mainRepoPath)
 	if err != nil {
-		return "", err
+		return "", false, err
 	}
 
 	// Check if branch exists locally or in remotes
@@ -561,18 +589,22 @@ func resolveBranchTracking(
 	if err != nil {
 		// Check if it's a multiple branches error
 		if strings.Contains(err.Error(), "exists in multiple remotes") {
-			return "", &MultipleBranchesError{
+			return "", false, &MultipleBranchesError{
 				BranchName: branchName,
 				GitError:   err,
 			}
 		}
-		return "", err
+		// Branch not found locally or remotely — signal auto-create
+		if strings.Contains(err.Error(), "not found in local or remote") {
+			return "", true, nil
+		}
+		return "", false, err
 	}
 
 	// If it's a remote branch, we need to set up tracking
 	if isRemote {
-		return resolvedBranch, nil
+		return resolvedBranch, false, nil
 	}
 
-	return "", nil
+	return "", false, nil
 }

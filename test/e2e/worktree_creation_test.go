@@ -66,6 +66,34 @@ func TestUserCreatesWorktree_WithNewBranchFlag_ShouldCreateBranchAndWorktree(t *
 	framework.AssertWorktreeExists(t, repo, "feature/payment")
 }
 
+// TestUserCreatesWorktree_WithNonexistentBranch_ShouldAutoCreate tests
+// the auto-create behavior when a branch doesn't exist anywhere.
+//
+// User Story: As a developer, when I run "gw add feature/new-thing" and the branch
+// doesn't exist locally or on any remote, I want gw to automatically create the branch
+// and worktree without requiring the -b flag.
+//
+// Business Value: Eliminates the need to remember the -b flag for new branches,
+// making the most common workflow (start working on something new) as simple as possible.
+func TestUserCreatesWorktree_WithNonexistentBranch_ShouldAutoCreate(t *testing.T) {
+	// Given: User is in a git repository
+	// And: Branch "feature/new-thing" does not exist anywhere
+	env := framework.NewTestEnvironment(t)
+	defer env.Cleanup()
+
+	repo := env.CreateTestRepo("user-auto-creates-branch")
+
+	// When: User runs "gw add feature/new-thing"
+	output, err := repo.RunWTP("add", "feature/new-thing")
+
+	// Then: Branch and worktree should be created automatically
+	framework.AssertNoError(t, err)
+	framework.AssertWorktreeCreated(t, output, "feature/new-thing")
+
+	// And: Worktree directory should exist
+	framework.AssertWorktreeExists(t, repo, "feature/new-thing")
+}
+
 // TestUserCreatesWorktree_WithCustomPath_ShouldCreateAtSpecifiedLocation tests
 // the flexibility to specify custom worktree locations.
 //

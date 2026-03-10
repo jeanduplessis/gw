@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/urfave/cli/v3"
+	"golang.org/x/term"
 
 	"github.com/jeanduplessis/gw/internal/command"
 	"github.com/jeanduplessis/gw/internal/config"
@@ -132,7 +133,33 @@ func cdCommandWithCommandExecutor(
 		return err
 	}
 
+	// If stdout is a terminal, the user is calling `gw cd` directly (not via the shell hook).
+	// Print a hint to stderr so they know the directory wasn't actually changed.
+	if isStdoutTerminal() {
+		printCdHint(os.Stderr, worktreeName)
+	}
+
 	return nil
+}
+
+// printCdHint writes a hint to the given writer explaining how to set up the shell hook.
+func printCdHint(w io.Writer, worktreeName string) {
+	hint := fmt.Sprintf(`
+hint: gw cd prints the path but cannot change your shell's directory directly.
+      Set up the shell hook for seamless navigation:
+        eval "$(gw shell-init bash)"   # bash
+        eval "$(gw shell-init zsh)"    # zsh
+        gw shell-init fish | source    # fish
+
+      Or use directly: cd "$(gw cd %s)"`, worktreeName)
+	_, _ = fmt.Fprintln(w, hint)
+}
+
+// isStdoutTerminal checks if stdout is connected to a terminal.
+// When the shell hook calls `gw cd`, stdout is captured via command substitution,
+// so it will NOT be a terminal. When a user calls `gw cd` directly, it WILL be a terminal.
+var isStdoutTerminal = func() bool {
+	return term.IsTerminal(int(os.Stdout.Fd()))
 }
 
 // findMainWorktreePath finds the main worktree from the list of worktrees

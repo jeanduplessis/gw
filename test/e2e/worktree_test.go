@@ -25,14 +25,13 @@ func TestWorktreeCreation(t *testing.T) {
 		framework.AssertWorktreeExists(t, repo, "feature/test-branch")
 	})
 
-	t.Run("NonexistentBranch", func(t *testing.T) {
+	t.Run("NonexistentBranchAutoCreates", func(t *testing.T) {
 		repo := env.CreateTestRepo("worktree-nonexistent")
 
 		output, err := repo.RunWTP("add", "nonexistent-branch")
-		framework.AssertError(t, err)
-		framework.AssertOutputContains(t, output, "not found in local or remote branches")
-		framework.AssertOutputContains(t, output, "Create a new branch with")
-		framework.AssertHelpfulError(t, output)
+		framework.AssertNoError(t, err)
+		framework.AssertWorktreeCreated(t, output, "nonexistent-branch")
+		framework.AssertWorktreeExists(t, repo, "nonexistent-branch")
 	})
 
 	t.Run("NewBranch", func(t *testing.T) {
