@@ -227,6 +227,33 @@ func TestCommandBuilder(t *testing.T) {
 		assert.Equal(t, "git", cmd.Name)
 		assert.Equal(t, []string{"branch", "-D", "old-feature"}, cmd.Args)
 	})
+
+	t.Run("should build git branch merged command", func(t *testing.T) {
+		// When: building a branch merged command
+		cmd := GitBranchMerged("main")
+
+		// Then: command should have correct structure
+		assert.Equal(t, "git", cmd.Name)
+		assert.Equal(t, []string{"branch", "--merged", "main"}, cmd.Args)
+	})
+
+	t.Run("should build git branch merged command with custom branch", func(t *testing.T) {
+		// When: building a branch merged command with a different base branch
+		cmd := GitBranchMerged("develop")
+
+		// Then: command should use the specified base branch
+		assert.Equal(t, "git", cmd.Name)
+		assert.Equal(t, []string{"branch", "--merged", "develop"}, cmd.Args)
+	})
+
+	t.Run("should build git symbolic-ref command", func(t *testing.T) {
+		// When: building a symbolic-ref command
+		cmd := GitSymbolicRef("refs/remotes/origin/HEAD")
+
+		// Then: command should have correct structure
+		assert.Equal(t, "git", cmd.Name)
+		assert.Equal(t, []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}, cmd.Args)
+	})
 }
 
 // Test real executor functions

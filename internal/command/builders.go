@@ -87,6 +87,22 @@ func GitWorktreeList() Command {
 	}
 }
 
+// GitBranchMerged builds a git branch --merged command to list branches merged into the given base branch.
+func GitBranchMerged(baseBranch string) Command {
+	return Command{
+		Name: "git",
+		Args: []string{"branch", "--merged", baseBranch},
+	}
+}
+
+// GitSymbolicRef builds a git symbolic-ref command to read a symbolic reference.
+func GitSymbolicRef(ref string) Command {
+	return Command{
+		Name: "git",
+		Args: []string{"symbolic-ref", "--short", ref},
+	}
+}
+
 // extractBranchName extracts branch name from a remote reference
 // e.g., "origin/feature" -> "feature"
 func extractBranchName(ref string) string {

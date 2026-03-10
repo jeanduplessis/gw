@@ -230,7 +230,7 @@ func ConfigAlreadyExists(configPath string) error {
 Options:
   • Edit the existing file manually
   • Delete it and run 'gw init' again
-  • Use 'gw init --force' to overwrite (if that flag exists)`, configPath)
+  • Run 'gw init' interactively to overwrite`, configPath)
 	return errors.New(msg)
 }
 
@@ -312,6 +312,18 @@ Solution: Specify the remote explicitly:
 		msg += fmt.Sprintf("\n  • gw add --track %s/%s %s", remotes[1], branchName, branchName)
 	}
 
+	return errors.New(msg)
+}
+
+// MainBranchNotFound indicates that the main branch could not be determined from the worktree list.
+func MainBranchNotFound() error {
+	msg := `could not determine main branch
+
+Cause: No main worktree with an associated branch was found
+
+Solutions:
+  • Ensure you are inside a git repository with at least one commit
+  • Check that the main worktree has a branch checked out (not detached HEAD)`
 	return errors.New(msg)
 }
 
